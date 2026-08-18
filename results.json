@@ -1,15 +1,17 @@
 {
-  "generated_at": "2026-08-18T20:10:38Z",
+  "generated_at": "2026-08-18T21:06:00Z",
   "repos": [
     {
       "repo": "LLNL/zfp",
-      "cdash_status": false,
+      "branch": "staging",
+      "cdash_status": true,
       "gh_gl_sync": false,
       "backport_action": false,
-      "total_score": 0
+      "total_score": 1
     },
     {
       "repo": "ornladios/ADIOS2",
+      "branch": "master",
       "cdash_status": true,
       "gh_gl_sync": false,
       "backport_action": false,
@@ -17,6 +19,7 @@
     },
     {
       "repo": "Viskores/viskores",
+      "branch": "main",
       "cdash_status": true,
       "gh_gl_sync": true,
       "backport_action": false,
@@ -24,6 +27,7 @@
     },
     {
       "repo": "Alpine-DAV/ascent",
+      "branch": "develop",
       "cdash_status": false,
       "gh_gl_sync": false,
       "backport_action": false,
@@ -31,6 +35,7 @@
     },
     {
       "repo": "Parallel-NetCDF/PnetCDF",
+      "branch": "master",
       "cdash_status": false,
       "gh_gl_sync": false,
       "backport_action": false,
@@ -38,6 +43,7 @@
     },
     {
       "repo": "visit-dav/visit",
+      "branch": "develop",
       "cdash_status": false,
       "gh_gl_sync": false,
       "backport_action": false,
@@ -45,6 +51,7 @@
     },
     {
       "repo": "HDFGroup/hdf5",
+      "branch": "develop",
       "cdash_status": false,
       "gh_gl_sync": false,
       "backport_action": false,
