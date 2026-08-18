@@ -1,15 +1,36 @@
 #!/usr/bin/env bash
-# Runs bin/check-repo.sh over every repo in data/repos.txt and renders the
-# static site published to gh-pages: an index table, a per-repo subpage, an
-# SVG score badge per repo, a checks explainer page, and results.json.
+# Runs bin/check-repo.sh over the DAV Stack and Tool Stack repo lists and
+# renders the static site published to gh-pages: an index page with one
+# matrix table per stack, a per-repo subpage, an SVG score badge per repo,
+# a checks explainer page, and results.json.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
 
-repos_file="${REPOS_FILE:-${repo_root}/data/repos.txt}"
 check_repo="${repo_root}/bin/check-repo.sh"
 site_dir="${SITE_DIR:-${repo_root}/site}"
+export CHECKS_DIR="${CHECKS_DIR:-${repo_root}/checks.d}"
+
+dav_stack_file="${DAV_STACK_FILE:-${repo_root}/data/repos-dav-stack.txt}"
+tool_stack_file="${TOOL_STACK_FILE:-${repo_root}/data/repos-tool-stack.txt}"
+group_defs=(
+  "DAV Stack:${dav_stack_file}"
+  "Tool Stack:${tool_stack_file}"
+)
+
+# The set and order of checks come straight from checks.d/: a filename like
+# checks.d/20-cdash-status.sh becomes the check name "cdash-status" (its
+# JSON key is "cdash_status"), so the site adapts automatically to whatever
+# check scripts exist, in the order their filenames sort in.
+check_names=()
+for check_script in "${CHECKS_DIR}"/*.sh; do
+  [[ -x "$check_script" ]] || continue
+  name="$(basename "$check_script" .sh)"
+  name="${name#*-}"
+  check_names+=("$name")
+done
+total_checks=${#check_names[@]}
 
 badges_dir="${site_dir}/badges"
 repos_dir="${site_dir}/repos"
@@ -19,11 +40,14 @@ mkdir -p "$badges_dir" "$repos_dir"
 generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 badge_color() {
-  case "$1" in
-    3) echo "#4c1" ;;
-    0) echo "#e05d44" ;;
-    *) echo "#dfb317" ;;
-  esac
+  local score="$1"
+  if [[ "$score" -eq "$total_checks" ]]; then
+    echo "#4c1"
+  elif [[ "$score" -eq 0 ]]; then
+    echo "#e05d44"
+  else
+    echo "#dfb317"
+  fi
 }
 
 # make_badge <label> <message> <color> <out_file>
@@ -48,9 +72,9 @@ SVG
 
 check_cell() {
   if [[ "$1" == true ]]; then
-    echo '<span class="result-pass">pass</span>'
+    echo '<span class="result-pass">yes</span>'
   else
-    echo '<span class="result-fail">fail</span>'
+    echo '<span class="result-fail">no</span>'
   fi
 }
 
@@ -158,6 +182,18 @@ code {
   font-size: 0.9em;
 }
 
+/* Matrix table (index page): one uniform-width column per check, so the
+   yes/no marks line up vertically like a real matrix. */
+table.matrix { table-layout: fixed; }
+table.matrix th:first-child, table.matrix td:first-child { width: 22%; }
+table.matrix th:not(:first-child), table.matrix td:not(:first-child) { width: 13%; }
+table.matrix th:last-child, table.matrix td:last-child { width: 26%; }
+@media (min-width: 641px) {
+  table.matrix th:not(:first-child), table.matrix td:not(:first-child) {
+    text-align: center;
+  }
+}
+
 /* Below this width, turn each table row into a stacked card instead of
    forcing horizontal scrolling on a narrow screen. */
 @media (max-width: 640px) {
@@ -190,34 +226,63 @@ code {
 }
 CSS
 
-results="[]"
-index_rows=""
+groups_json="[]"
+declare -A group_rows_by_label
 
-while IFS= read -r line; do
-  [[ -z "$line" || "$line" == \#* ]] && continue
-  read -r repo branch <<<"$line"
-  echo "Checking ${repo}${branch:+@${branch}}..." >&2
+for group_def in "${group_defs[@]}"; do
+  label="${group_def%%:*}"
+  file="${group_def#*:}"
+  [[ -f "$file" ]] || { echo "Missing repos file: ${file}" >&2; exit 1; }
 
-  if [[ -n "$branch" ]]; then
-    result=$("$check_repo" "$repo" "$branch")
-  else
-    result=$("$check_repo" "$repo")
-  fi
-  results=$(jq --argjson r "$result" '. + [$r]' <<<"$results")
+  group_results="[]"
+  rows=""
 
-  score=$(jq -r .total_score <<<"$result")
-  checked_branch=$(jq -r .branch <<<"$result")
-  cdash=$(jq -r .cdash_status <<<"$result")
-  glsync=$(jq -r .gh_gl_sync <<<"$result")
-  backport=$(jq -r .backport_action <<<"$result")
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    read -ra tokens <<<"$line"
+    repo="${tokens[0]}"
+    branch=""
+    cdash_project=""
+    cdash_server=""
+    for tok in "${tokens[@]:1}"; do
+      case "$tok" in
+        branch=*) branch="${tok#branch=}" ;;
+        cdash_server=*) cdash_server="${tok#cdash_server=}" ;;
+        cdash=*) cdash_project="${tok#cdash=}" ;;
+      esac
+    done
 
-  slug="${repo//\//__}"
-  repo_dir="${repos_dir}/${slug}"
-  mkdir -p "$repo_dir"
+    echo "Checking ${repo}${branch:+@${branch}} (${label})..." >&2
 
-  make_badge "PESO Scorecard" "${score}/3" "$(badge_color "$score")" "${badges_dir}/${slug}.svg"
+    args=("$repo")
+    [[ -n "$branch" ]] && args+=(--branch "$branch")
+    [[ -n "$cdash_project" ]] && args+=(--cdash-project "$cdash_project")
+    [[ -n "$cdash_server" ]] && args+=(--cdash-server "$cdash_server")
+    result=$("$check_repo" "${args[@]}")
+    group_results=$(jq --argjson r "$result" '. + [$r]' <<<"$group_results")
 
-  cat >"${repo_dir}/index.html" <<HTML
+    score=$(jq -r .total_score <<<"$result")
+    checked_branch=$(jq -r .branch <<<"$result")
+    cdash_project_checked=$(jq -r .cdash_project <<<"$result")
+    cdash_server_checked=$(jq -r .cdash_server <<<"$result")
+
+    subpage_check_rows=""
+    matrix_check_cells=""
+    for name in "${check_names[@]}"; do
+      key="${name//-/_}"
+      value=$(jq -r --arg k "$key" '.[$k]' <<<"$result")
+      subpage_check_rows="${subpage_check_rows}<tr><td data-label=\"Check\"><code>${name}</code></td><td data-label=\"Result\">$(check_cell "$value")</td></tr>
+"
+      matrix_check_cells="${matrix_check_cells}<td data-label=\"${name}\">$(check_cell "$value")</td>"
+    done
+
+    slug="${repo//\//__}"
+    repo_dir="${repos_dir}/${slug}"
+    mkdir -p "$repo_dir"
+
+    make_badge "PESO Scorecard" "${score}/${total_checks}" "$(badge_color "$score")" "${badges_dir}/${slug}.svg"
+
+    cat >"${repo_dir}/index.html" <<HTML
 <!doctype html>
 <html lang="en">
 <head>
@@ -235,28 +300,54 @@ while IFS= read -r line; do
 </header>
 <main class="container">
   <h1>${repo}</h1>
-  <p><a href="index.html"><img src="../../badges/${slug}.svg" alt="${score}/3 checks passing"></a></p>
+  <p><a href="index.html"><img src="../../badges/${slug}.svg" alt="${score}/${total_checks} checks passing"></a></p>
   <p><a href="https://github.com/${repo}">github.com/${repo}</a> &middot; branch <code>${checked_branch}</code></p>
   <table>
   <thead><tr><th>Check</th><th>Result</th></tr></thead>
   <tbody>
-  <tr><td data-label="Check"><code>cdash-status</code></td><td data-label="Result">$(check_cell "$cdash")</td></tr>
-  <tr><td data-label="Check"><code>gh-gl-sync</code></td><td data-label="Result">$(check_cell "$glsync")</td></tr>
-  <tr><td data-label="Check"><code>backport-action</code></td><td data-label="Result">$(check_cell "$backport")</td></tr>
-  </tbody>
+  ${subpage_check_rows}</tbody>
   </table>
+  <p class="meta">CDash project checked: <code>${cdash_project_checked}</code> on <code>${cdash_server_checked}</code></p>
   <footer>Generated: ${generated_at}</footer>
 </main>
 </body>
 </html>
 HTML
 
-  index_rows="${index_rows}<tr><td data-label=\"Repository\"><a class=\"repo-link\" href=\"repos/${slug}/index.html\">${repo}</a></td><td data-label=\"Score\"><a href=\"repos/${slug}/index.html\"><img src=\"badges/${slug}.svg\" alt=\"${score}/3 checks passing\"></a></td></tr>
+    rows="${rows}<tr>\
+<td data-label=\"Repository\"><a class=\"repo-link\" href=\"repos/${slug}/index.html\">${repo}</a></td>\
+${matrix_check_cells}\
+<td data-label=\"Score\"><a href=\"repos/${slug}/index.html\"><img src=\"badges/${slug}.svg\" alt=\"${score}/${total_checks} checks passing\"></a></td>\
+</tr>
 "
-done <"$repos_file"
+  done <"$file"
 
-jq -n --argjson repos "$results" --arg generated_at "$generated_at" \
-  '{generated_at: $generated_at, repos: $repos}' >"${site_dir}/results.json"
+  group_rows_by_label["$label"]="$rows"
+  groups_json=$(jq --arg label "$label" --argjson repos "$group_results" \
+    '. + [{label: $label, repos: $repos}]' <<<"$groups_json")
+done
+
+jq -n --argjson groups "$groups_json" --arg generated_at "$generated_at" \
+  '{generated_at: $generated_at, groups: $groups}' >"${site_dir}/results.json"
+
+matrix_header_cells="<th>Repository</th>"
+for name in "${check_names[@]}"; do
+  matrix_header_cells="${matrix_header_cells}<th><code>${name}</code></th>"
+done
+matrix_header_cells="${matrix_header_cells}<th>Score</th>"
+
+index_sections=""
+for group_def in "${group_defs[@]}"; do
+  label="${group_def%%:*}"
+  index_sections="${index_sections}
+  <h2>${label}</h2>
+  <table class=\"matrix\">
+  <thead><tr>${matrix_header_cells}</tr></thead>
+  <tbody>
+  ${group_rows_by_label[$label]}</tbody>
+  </table>
+"
+done
 
 cat >"${site_dir}/index.html" <<HTML
 <!doctype html>
@@ -274,13 +365,9 @@ cat >"${site_dir}/index.html" <<HTML
   </nav>
 </header>
 <main class="container">
-  <h1>DoE PESO DAV SDK best-practices checklist</h1>
+  <h1>DoE PESO best-practices checklist</h1>
   <p class="meta">Generated: ${generated_at}</p>
-  <table>
-  <thead><tr><th>Repository</th><th>Score</th></tr></thead>
-  <tbody>
-  ${index_rows}</tbody>
-  </table>
+  ${index_sections}
 </main>
 </body>
 </html>
@@ -301,6 +388,14 @@ cat >"${site_dir}/checks.html" <<HTML
 </header>
 <main class="container">
   <h1>What do these checks mean?</h1>
+
+  <h2><code>cdash-dashboard</code></h2>
+  <p>Whether the project has a dashboard on a CDash server (by default
+  <a href="https://open.cdash.org">open.cdash.org</a>; some projects run
+  their own, e.g. HDFGroup/hdf5's is my.cdash.org). A project dashboard
+  there aggregates CTest results (build, test, and coverage) submitted from
+  machines across the team, giving a shared view of build health beyond a
+  single CI run.</p>
 
   <h2><code>cdash-status</code></h2>
   <p>The <code>Kitware/cdash-status</code> GitHub Action. It reports CDash build

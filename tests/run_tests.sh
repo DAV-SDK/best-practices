@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Test suite for bin/check-repo.sh. Uses a fake `gh` CLI (tests/fixtures/bin/gh)
-# so no network access or real GitHub credentials are required.
+# Test suite for bin/check-repo.sh and scripts/generate-site-data.sh. Uses a
+# fake `gh` and `curl` (tests/fixtures/bin/) so no network access or GitHub
+# credentials are required.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
 
 export GH_FAKE_FIXTURES="${script_dir}/fixtures/repos"
+export CURL_FAKE_CDASH_PROJECTS="${script_dir}/fixtures/cdash-projects.txt"
 export PATH="${script_dir}/fixtures/bin:${PATH}"
 
 check_repo="${repo_root}/bin/check-repo.sh"
@@ -47,34 +49,67 @@ assert_grep() {
   fi
 }
 
+# run_case <repo> <extra check-repo.sh args...> -- <desc> <score> <cdash> <glsync> <backport> <cdash_dashboard>
 run_case() {
-  local repo="$1" branch="$2" expected_score="$3" expected_cdash="$4" expected_glsync="$5" expected_backport="$6"
-  local output desc
-  desc="${repo}${branch:+@${branch}}"
-
-  if [[ -n "$branch" ]]; then
-    output=$("$check_repo" "$repo" "$branch")
-  else
-    output=$("$check_repo" "$repo")
-  fi
+  local repo="$1"
+  shift
+  local extra_args=()
+  while [[ "$1" != "--" ]]; do
+    extra_args+=("$1")
+    shift
+  done
+  shift
+  local desc="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5" expected_dash="$6"
+  local output
+  output=$("$check_repo" "$repo" "${extra_args[@]}")
 
   assert_eq "${desc} is valid JSON" "0" "$(jq -e . >/dev/null <<<"$output"; echo $?)"
   assert_eq "${desc} total_score" "$expected_score" "$(jq -r .total_score <<<"$output")"
   assert_eq "${desc} cdash_status" "$expected_cdash" "$(jq -r .cdash_status <<<"$output")"
   assert_eq "${desc} gh_gl_sync" "$expected_glsync" "$(jq -r .gh_gl_sync <<<"$output")"
   assert_eq "${desc} backport_action" "$expected_backport" "$(jq -r .backport_action <<<"$output")"
-  if [[ -n "$branch" ]]; then
-    assert_eq "${desc} reports requested branch" "$branch" "$(jq -r .branch <<<"$output")"
-  fi
+  assert_eq "${desc} cdash_dashboard" "$expected_dash" "$(jq -r .cdash_dashboard <<<"$output")"
 }
 
-run_case "acme/full" "" 3 true true true
-run_case "acme/none" "" 0 false false false
-run_case "acme/partial" "" 2 false true true
+# acme/full's default cdash-project guess ("full") is in the fake curl's
+# fixture list, so all four checks pass.
+run_case "acme/full" -- "acme/full" 4 true true true true
+run_case "acme/none" -- "acme/none" 0 false false false false
+run_case "acme/partial" -- "acme/partial" 2 false true true false
 
 # branch selection: same repo, different result depending on which branch is checked
-run_case "acme/branchy" "" 0 false false false
-run_case "acme/branchy" "release-1.0" 3 true true true
+run_case "acme/branchy" -- "acme/branchy@default" 0 false false false false
+run_case "acme/branchy" --branch "release-1.0" -- "acme/branchy@release-1.0" 3 true true true false
+
+# explicit --cdash-project override, independent of the repo's default guess
+run_case "acme/none" --cdash-project "override-project" -- "acme/none with cdash override" 1 false false false true
+
+# --cdash-server: same project name exists on my.cdash.org but not on the
+# default open.cdash.org, so the server actually has to be honored
+run_case "acme/none" --cdash-project "hdf5-style-project" -- \
+  "acme/none, project on default server (should not exist)" 0 false false false false
+run_case "acme/none" --cdash-project "hdf5-style-project" --cdash-server "https://my.cdash.org" -- \
+  "acme/none, project on my.cdash.org" 1 false false false true
+
+output=$("$check_repo" "acme/branchy" --branch "release-1.0")
+assert_eq "acme/branchy@release-1.0 reports requested branch" "release-1.0" "$(jq -r .branch <<<"$output")"
+
+# checks.d is a plugin directory: check-repo.sh should run whatever's in
+# there, not a hardcoded set of checks. Point it at a synthetic checks.d
+# with a passing and a failing script and confirm it picks both up.
+plugin_checks_dir="$(mktemp -d)"
+trap 'rm -rf "$plugin_checks_dir"' EXIT
+printf '#!/usr/bin/env bash\nexit 0\n' >"${plugin_checks_dir}/10-always-yes.sh"
+printf '#!/usr/bin/env bash\nexit 1\n' >"${plugin_checks_dir}/20-always-no.sh"
+chmod +x "${plugin_checks_dir}"/*.sh
+
+output=$(CHECKS_DIR="$plugin_checks_dir" "$check_repo" "acme/none")
+assert_eq "custom checks.d: total_checks reflects the plugin directory" "2" "$(jq -r .total_checks <<<"$output")"
+assert_eq "custom checks.d: total_score counts only the passing check" "1" "$(jq -r .total_score <<<"$output")"
+assert_eq "custom checks.d: always-yes check passes" "true" "$(jq -r .always_yes <<<"$output")"
+assert_eq "custom checks.d: always-no check fails" "false" "$(jq -r .always_no <<<"$output")"
+rm -rf "$plugin_checks_dir"
+trap - EXIT
 
 if "$check_repo" >/dev/null 2>&1; then
   echo "not ok - running with no args should fail"
@@ -86,12 +121,13 @@ fi
 
 assert_grep "check-repo.sh clones with --depth 1" "--depth 1" "${repo_root}/bin/check-repo.sh"
 
-# generate-site-data.sh: index page, per-repo subpages, and badges
+# generate-site-data.sh: index page (two group matrices), per-repo subpages, badges
 site_tmp="$(mktemp -d)"
 trap 'rm -rf "$site_tmp"' EXIT
 
-printf 'acme/full\nacme/none\nacme/partial\nacme/branchy release-1.0\n' >"${site_tmp}/repos.txt"
-REPOS_FILE="${site_tmp}/repos.txt" SITE_DIR="${site_tmp}/site" \
+printf 'acme/full\nacme/none\n' >"${site_tmp}/dav.txt"
+printf 'acme/partial\nacme/branchy branch=release-1.0 cdash=hdf5-style-project cdash_server=https://my.cdash.org\n' >"${site_tmp}/tool.txt"
+DAV_STACK_FILE="${site_tmp}/dav.txt" TOOL_STACK_FILE="${site_tmp}/tool.txt" SITE_DIR="${site_tmp}/site" \
   "${repo_root}/scripts/generate-site-data.sh" >/dev/null 2>&1
 
 assert_file "site index.html exists" "${site_tmp}/site/index.html"
@@ -105,13 +141,27 @@ assert_grep "index links to checks.html" "checks.html" "${site_tmp}/site/index.h
 assert_grep "index has viewport meta tag" 'name="viewport"' "${site_tmp}/site/index.html"
 assert_grep "index links to stylesheet" 'href="style.css"' "${site_tmp}/site/index.html"
 assert_grep "index rows carry data-label for mobile layout" 'data-label="Repository"' "${site_tmp}/site/index.html"
+assert_grep "index has a DAV Stack section" "<h2>DAV Stack</h2>" "${site_tmp}/site/index.html"
+assert_grep "index has a Tool Stack section" "<h2>Tool Stack</h2>" "${site_tmp}/site/index.html"
+assert_eq "index renders two matrix tables" "2" "$(grep -oF 'class="matrix"' "${site_tmp}/site/index.html" | wc -l)"
+assert_grep "index has a column per check" 'data-label="cdash-status"' "${site_tmp}/site/index.html"
+assert_grep "index has a cdash-dashboard column" 'data-label="cdash-dashboard"' "${site_tmp}/site/index.html"
+assert_grep "acme/full shows a pass in the matrix" 'data-label="cdash-status"><span class="result-pass">' "${site_tmp}/site/index.html"
+assert_grep "acme/none shows a fail in the matrix" 'data-label="backport-action"><span class="result-fail">' "${site_tmp}/site/index.html"
 assert_grep "subpage rows carry data-label for mobile layout" 'data-label="Check"' "${site_tmp}/site/repos/acme__full/index.html"
+assert_grep "subpage has a cdash-dashboard row" '<code>cdash-dashboard</code>' "${site_tmp}/site/repos/acme__full/index.html"
 assert_grep "stylesheet defines mobile card breakpoint" '@media (max-width: 640px)' "${site_tmp}/site/style.css"
-assert_grep "acme/full badge is green (score 3)" "#4c1" "${site_tmp}/site/badges/acme__full.svg"
+assert_grep "acme/full badge is green (score 4)" "#4c1" "${site_tmp}/site/badges/acme__full.svg"
 assert_grep "acme/none badge is red (score 0)" "#e05d44" "${site_tmp}/site/badges/acme__none.svg"
-assert_eq "results.json has 4 repos" "4" "$(jq '.repos | length' "${site_tmp}/site/results.json")"
+assert_eq "results.json has 2 groups" "2" "$(jq '.groups | length' "${site_tmp}/site/results.json")"
+assert_eq "DAV Stack group has 2 repos" "2" \
+  "$(jq '.groups[] | select(.label=="DAV Stack") | .repos | length' "${site_tmp}/site/results.json")"
+assert_eq "Tool Stack group has 2 repos" "2" \
+  "$(jq '.groups[] | select(.label=="Tool Stack") | .repos | length' "${site_tmp}/site/results.json")"
 assert_file "acme/branchy subpage exists" "${site_tmp}/site/repos/acme__branchy/index.html"
 assert_grep "acme/branchy subpage shows the requested branch" "release-1.0" "${site_tmp}/site/repos/acme__branchy/index.html"
+assert_grep "acme/branchy subpage shows its custom cdash_server" "my.cdash.org" "${site_tmp}/site/repos/acme__branchy/index.html"
+assert_grep "acme/branchy badge is green (cdash_server override completes the score)" "#4c1" "${site_tmp}/site/badges/acme__branchy.svg"
 
 rm -rf "$site_tmp"
 trap - EXIT

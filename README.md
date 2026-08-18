@@ -1,30 +1,54 @@
 # best-practices
 
-Checks the DoE PESO DAV SDK base repositories for a few CI best practices and
-publishes the results as a static site.
+Checks the DoE PESO base repositories (DAV Stack and Tool Stack) for a few
+CI best practices and publishes the results as a static site, with one
+matrix table per stack.
 
-Checks performed on each repo:
+Each check is a standalone script in `checks.d/`:
 
-- uses the `Kitware/cdash-status` GitHub Action
-- uses the `gh-gl-sync` GitLab CI/CD component (in any YAML file in the repo)
-- uses the `korthout/backport-action` GitHub Action
+- `10-cdash-dashboard.sh` - has a project dashboard on a CDash server
+  (default [open.cdash.org](https://open.cdash.org); configurable per repo)
+- `20-cdash-status.sh` - uses the `Kitware/cdash-status` GitHub Action
+- `30-gh-gl-sync.sh` - uses the `gh-gl-sync` GitLab CI/CD component (in any
+  YAML file in the repo)
+- `40-backport-action.sh` - uses the `korthout/backport-action` GitHub Action
+
+### Adding a check
+
+Drop an executable script into `checks.d/`, named `NN-check-name.sh` (`NN`
+controls its ordering; `check-name` becomes its `check_name` key in the JSON
+output and its column heading on the site - both `bin/check-repo.sh` and
+`scripts/generate-site-data.sh` pick it up automatically, no other changes
+needed). The script runs against the repo checkout with these in its
+environment, and must exit 0 (check passes) or non-zero (fails):
+
+- `REPO_DIR` - path to the shallow clone of the repo being checked
+- `REPO` - `owner/repo`
+- `BRANCH` - the branch actually checked
+- `CDASH_PROJECT`, `CDASH_SERVER` - resolved CDash project name/server,
+  for checks that need them
 
 ## Requirements
 
 - [`gh`](https://cli.github.com/), authenticated (`gh auth login`)
 - `git`
 - `jq`
+- `curl`
 - `bash`
 
 ## Checking a single repo
 
 ```sh
-./bin/check-repo.sh owner/repo [branch]
+./bin/check-repo.sh owner/repo [--branch BRANCH] [--cdash-project NAME] [--cdash-server URL]
 ```
 
-`branch` is optional and defaults to the repo's default branch. The repo is
-fetched with a shallow (`--depth 1`) clone of just that branch, then checked
-locally.
+`--branch` defaults to the repo's default branch; the repo is fetched with a
+shallow (`--depth 1`) clone of just that branch, then checked locally.
+`--cdash-project` defaults to the part of `owner/repo` after the slash, and
+`--cdash-server` defaults to `https://open.cdash.org` - some projects run
+their own CDash server (e.g. `HDFGroup/hdf5`'s is `https://my.cdash.org`),
+and project names don't always match the GitHub repo name either (e.g.
+`ornladios/ADIOS2`'s project is `ADIOS`).
 
 ```json
 {
@@ -33,6 +57,9 @@ locally.
   "cdash_status": false,
   "gh_gl_sync": false,
   "backport_action": false,
+  "cdash_dashboard": false,
+  "cdash_project": "repo",
+  "cdash_server": "https://open.cdash.org",
   "total_score": 0
 }
 ```
@@ -43,13 +70,22 @@ locally.
 ./scripts/generate-site-data.sh
 ```
 
-By default this reads repos from `data/repos.txt` (one `owner/repo` per
-line, optionally followed by a branch, e.g. `owner/repo release-1.0`) and
-writes the site to `site/`. Both paths can be overridden, e.g. to do a dry
-run without touching the real `site/` directory:
+By default this reads `data/repos-dav-stack.txt` and
+`data/repos-tool-stack.txt` and writes the site to `site/`. Each file has one
+`owner/repo` per line, optionally followed by whitespace-separated
+`key=value` tokens:
+
+```
+ornladios/ADIOS2 branch=release_29 cdash=ADIOS
+HDFGroup/hdf5 cdash=HDF5 cdash_server=https://my.cdash.org
+```
+
+All three paths can be overridden, e.g. to do a dry run without touching the
+real `site/` directory:
 
 ```sh
-REPOS_FILE=/path/to/repos.txt SITE_DIR=/path/to/out ./scripts/generate-site-data.sh
+DAV_STACK_FILE=/path/to/dav.txt TOOL_STACK_FILE=/path/to/tools.txt \
+  SITE_DIR=/path/to/out ./scripts/generate-site-data.sh
 ```
 
 ## Running tests
@@ -58,8 +94,8 @@ REPOS_FILE=/path/to/repos.txt SITE_DIR=/path/to/out ./scripts/generate-site-data
 ./tests/run_tests.sh
 ```
 
-Tests run against a fake `gh` (`tests/fixtures/bin/gh`), so no network access
-or GitHub authentication is required.
+Tests run against a fake `gh` and `curl` (`tests/fixtures/bin/`), so no
+network access or GitHub authentication is required.
 
 ## Publishing
 

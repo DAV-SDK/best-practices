@@ -1,0 +1,16 @@
+# One "owner/repo" per line, optionally followed by whitespace-separated
+# key=value tokens:
+#   branch=BRANCH        check this branch instead of the repo's default branch
+#   cdash=NAME           CDash project name, if it differs from the part of
+#                        owner/repo after the slash
+#   cdash_server=URL     CDash server, if not https://open.cdash.org
+LLNL/zfp branch=staging
+# mrzv/diy  # temporarily disabled
+ornladios/ADIOS2 cdash=ADIOS
+Viskores/viskores cdash=Viskores
+# Kitware/ParaView  # temporarily disabled
+Alpine-DAV/ascent
+Parallel-NetCDF/PnetCDF
+# Kitware/catalyst  # temporarily disabled
+visit-dav/visit
+HDFGroup/hdf5 cdash=HDF5 cdash_server=https://my.cdash.org

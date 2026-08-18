@@ -13,9 +13,11 @@ jobs:
       - name: shellcheck
         run: |
           shellcheck bin/check-repo.sh \
+            checks.d/*.sh \
             scripts/generate-site-data.sh \
             tests/run_tests.sh \
-            tests/fixtures/bin/gh
+            tests/fixtures/bin/gh \
+            tests/fixtures/bin/curl
 
       - name: Run tests
         run: ./tests/run_tests.sh

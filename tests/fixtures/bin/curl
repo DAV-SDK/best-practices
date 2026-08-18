@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Fake `curl` used by tests, for the CDash existence check in
+# bin/check-repo.sh. Looks up "<host> <project>" (from the URL's host and
+# its "project=" query parameter) against a fixture list of known-existing
+# host/project pairs and prints "200" or "404" - whatever the real
+# invocation's `-w '%{http_code}'` would have captured.
+set -euo pipefail
+
+fixtures_file="${CURL_FAKE_CDASH_PROJECTS:?CURL_FAKE_CDASH_PROJECTS must be set}"
+
+url=""
+for arg in "$@"; do
+  case "$arg" in
+    http*) url="$arg" ;;
+  esac
+done
+[[ -n "$url" ]] || { echo "fake curl: no URL in: $*" >&2; exit 1; }
+
+host="${url#*://}"
+host="${host%%/*}"
+
+project="${url#*project=}"
+project="${project%%&*}"
+
+if grep -qxF "${host} ${project}" "$fixtures_file"; then
+  printf '200'
+else
+  printf '404'
+fi
