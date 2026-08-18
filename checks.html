@@ -13,6 +13,14 @@
 <main class="container">
   <h1>What do these checks mean?</h1>
 
+  <h2><code>cdash-dashboard</code></h2>
+  <p>Whether the project has a dashboard on a CDash server (by default
+  <a href="https://open.cdash.org">open.cdash.org</a>; some projects run
+  their own, e.g. HDFGroup/hdf5's is my.cdash.org). A project dashboard
+  there aggregates CTest results (build, test, and coverage) submitted from
+  machines across the team, giving a shared view of build health beyond a
+  single CI run.</p>
+
   <h2><code>cdash-status</code></h2>
   <p>The <code>Kitware/cdash-status</code> GitHub Action. It reports CDash build
   and test results back onto a pull request as a status check. Repos that use

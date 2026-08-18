@@ -101,6 +101,18 @@ code {
   font-size: 0.9em;
 }
 
+/* Matrix table (index page): one uniform-width column per check, so the
+   yes/no marks line up vertically like a real matrix. */
+table.matrix { table-layout: fixed; }
+table.matrix th:first-child, table.matrix td:first-child { width: 22%; }
+table.matrix th:not(:first-child), table.matrix td:not(:first-child) { width: 13%; }
+table.matrix th:last-child, table.matrix td:last-child { width: 26%; }
+@media (min-width: 641px) {
+  table.matrix th:not(:first-child), table.matrix td:not(:first-child) {
+    text-align: center;
+  }
+}
+
 /* Below this width, turn each table row into a stacked card instead of
    forcing horizontal scrolling on a narrow screen. */
 @media (max-width: 640px) {
