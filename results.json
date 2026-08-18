@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-08-18T03:20:14Z",
+  "repos": [
+    {
+      "repo": "LLNL/zfp",
+      "cdash_status": false,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 0
+    },
+    {
+      "repo": "ornladios/ADIOS2",
+      "cdash_status": true,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 1
+    },
+    {
+      "repo": "Viskores/viskores",
+      "cdash_status": true,
+      "gh_gl_sync": true,
+      "backport_action": false,
+      "total_score": 2
+    },
+    {
+      "repo": "Alpine-DAV/ascent",
+      "cdash_status": false,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 0
+    },
+    {
+      "repo": "Parallel-NetCDF/PnetCDF",
+      "cdash_status": false,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 0
+    },
+    {
+      "repo": "visit-dav/visit",
+      "cdash_status": false,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 0
+    },
+    {
+      "repo": "HDFGroup/hdf5",
+      "cdash_status": false,
+      "gh_gl_sync": false,
+      "backport_action": false,
+      "total_score": 0
+    }
+  ]
+}

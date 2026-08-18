@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checks explained - DAV SDK Best Practices</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav><a href="index.html">&larr; all repositories</a></nav>
+</header>
+<main class="container">
+  <h1>What do these checks mean?</h1>
+
+  <h2><code>cdash-status</code></h2>
+  <p>The <code>Kitware/cdash-status</code> GitHub Action. It reports CDash build
+  and test results back onto a pull request as a status check. Repos that use
+  it give reviewers CTest/CDash results directly in the PR, instead of
+  requiring a separate visit to a CDash dashboard.</p>
+
+  <h2><code>gh-gl-sync</code></h2>
+  <p>A GitLab CI/CD component that mirrors GitHub activity into a GitLab
+  pipeline. Repos that use it can run CI on GitLab-hosted runners (for example
+  for hardware or platforms not available on GitHub-hosted runners) while
+  staying in sync with GitHub pull requests and issues.</p>
+
+  <h2><code>backport-action</code></h2>
+  <p>The <code>korthout/backport-action</code> GitHub Action. It automatically
+  opens a backport pull request to a maintenance or release branch when a
+  merged PR is labeled for backporting. Repos that use it reduce the manual,
+  error-prone work of cherry-picking
+  fixes onto release branches.</p>
+</main>
+</body>
+</html>
