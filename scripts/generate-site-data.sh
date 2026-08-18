@@ -209,7 +209,7 @@ while IFS= read -r repo; do
   repo_dir="${repos_dir}/${slug}"
   mkdir -p "$repo_dir"
 
-  make_badge "PESO Best Practices" "${score}/3" "$(badge_color "$score")" "${badges_dir}/${slug}.svg"
+  make_badge "PESO Scorecard" "${score}/3" "$(badge_color "$score")" "${badges_dir}/${slug}.svg"
 
   cat >"${repo_dir}/index.html" <<HTML
 <!doctype html>
