@@ -12,18 +12,24 @@ Checks performed on each repo:
 ## Requirements
 
 - [`gh`](https://cli.github.com/), authenticated (`gh auth login`)
+- `git`
 - `jq`
 - `bash`
 
 ## Checking a single repo
 
 ```sh
-./bin/check-repo.sh owner/repo
+./bin/check-repo.sh owner/repo [branch]
 ```
+
+`branch` is optional and defaults to the repo's default branch. The repo is
+fetched with a shallow (`--depth 1`) clone of just that branch, then checked
+locally.
 
 ```json
 {
   "repo": "owner/repo",
+  "branch": "main",
   "cdash_status": false,
   "gh_gl_sync": false,
   "backport_action": false,
@@ -37,9 +43,10 @@ Checks performed on each repo:
 ./scripts/generate-site-data.sh
 ```
 
-By default this reads repos from `data/repos.txt` and writes the site to
-`site/`. Both can be overridden, e.g. to do a dry run without touching the
-real `site/` directory:
+By default this reads repos from `data/repos.txt` (one `owner/repo` per
+line, optionally followed by a branch, e.g. `owner/repo release-1.0`) and
+writes the site to `site/`. Both paths can be overridden, e.g. to do a dry
+run without touching the real `site/` directory:
 
 ```sh
 REPOS_FILE=/path/to/repos.txt SITE_DIR=/path/to/out ./scripts/generate-site-data.sh

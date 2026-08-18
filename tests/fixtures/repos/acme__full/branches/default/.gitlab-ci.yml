@@ -1,0 +1,2 @@
+include:
+  - component: gitlab.example.com/sync/gh-gl-sync@~latest

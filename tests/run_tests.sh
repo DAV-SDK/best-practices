@@ -38,7 +38,7 @@ assert_file() {
 
 assert_grep() {
   local desc="$1" pattern="$2" file="$3"
-  if grep -qF "$pattern" "$file"; then
+  if grep -qF -- "$pattern" "$file"; then
     echo "ok - ${desc}"
     pass=$((pass + 1))
   else
@@ -48,20 +48,33 @@ assert_grep() {
 }
 
 run_case() {
-  local repo="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5"
-  local output
-  output=$("$check_repo" "$repo")
+  local repo="$1" branch="$2" expected_score="$3" expected_cdash="$4" expected_glsync="$5" expected_backport="$6"
+  local output desc
+  desc="${repo}${branch:+@${branch}}"
 
-  assert_eq "${repo} is valid JSON" "0" "$(jq -e . >/dev/null <<<"$output"; echo $?)"
-  assert_eq "${repo} total_score" "$expected_score" "$(jq -r .total_score <<<"$output")"
-  assert_eq "${repo} cdash_status" "$expected_cdash" "$(jq -r .cdash_status <<<"$output")"
-  assert_eq "${repo} gh_gl_sync" "$expected_glsync" "$(jq -r .gh_gl_sync <<<"$output")"
-  assert_eq "${repo} backport_action" "$expected_backport" "$(jq -r .backport_action <<<"$output")"
+  if [[ -n "$branch" ]]; then
+    output=$("$check_repo" "$repo" "$branch")
+  else
+    output=$("$check_repo" "$repo")
+  fi
+
+  assert_eq "${desc} is valid JSON" "0" "$(jq -e . >/dev/null <<<"$output"; echo $?)"
+  assert_eq "${desc} total_score" "$expected_score" "$(jq -r .total_score <<<"$output")"
+  assert_eq "${desc} cdash_status" "$expected_cdash" "$(jq -r .cdash_status <<<"$output")"
+  assert_eq "${desc} gh_gl_sync" "$expected_glsync" "$(jq -r .gh_gl_sync <<<"$output")"
+  assert_eq "${desc} backport_action" "$expected_backport" "$(jq -r .backport_action <<<"$output")"
+  if [[ -n "$branch" ]]; then
+    assert_eq "${desc} reports requested branch" "$branch" "$(jq -r .branch <<<"$output")"
+  fi
 }
 
-run_case "acme/full" 3 true true true
-run_case "acme/none" 0 false false false
-run_case "acme/partial" 2 false true true
+run_case "acme/full" "" 3 true true true
+run_case "acme/none" "" 0 false false false
+run_case "acme/partial" "" 2 false true true
+
+# branch selection: same repo, different result depending on which branch is checked
+run_case "acme/branchy" "" 0 false false false
+run_case "acme/branchy" "release-1.0" 3 true true true
 
 if "$check_repo" >/dev/null 2>&1; then
   echo "not ok - running with no args should fail"
@@ -71,11 +84,13 @@ else
   pass=$((pass + 1))
 fi
 
+assert_grep "check-repo.sh clones with --depth 1" "--depth 1" "${repo_root}/bin/check-repo.sh"
+
 # generate-site-data.sh: index page, per-repo subpages, and badges
 site_tmp="$(mktemp -d)"
 trap 'rm -rf "$site_tmp"' EXIT
 
-printf 'acme/full\nacme/none\nacme/partial\n' >"${site_tmp}/repos.txt"
+printf 'acme/full\nacme/none\nacme/partial\nacme/branchy release-1.0\n' >"${site_tmp}/repos.txt"
 REPOS_FILE="${site_tmp}/repos.txt" SITE_DIR="${site_tmp}/site" \
   "${repo_root}/scripts/generate-site-data.sh" >/dev/null 2>&1
 
@@ -94,7 +109,9 @@ assert_grep "subpage rows carry data-label for mobile layout" 'data-label="Check
 assert_grep "stylesheet defines mobile card breakpoint" '@media (max-width: 640px)' "${site_tmp}/site/style.css"
 assert_grep "acme/full badge is green (score 3)" "#4c1" "${site_tmp}/site/badges/acme__full.svg"
 assert_grep "acme/none badge is red (score 0)" "#e05d44" "${site_tmp}/site/badges/acme__none.svg"
-assert_eq "results.json has 3 repos" "3" "$(jq '.repos | length' "${site_tmp}/site/results.json")"
+assert_eq "results.json has 4 repos" "4" "$(jq '.repos | length' "${site_tmp}/site/results.json")"
+assert_file "acme/branchy subpage exists" "${site_tmp}/site/repos/acme__branchy/index.html"
+assert_grep "acme/branchy subpage shows the requested branch" "release-1.0" "${site_tmp}/site/repos/acme__branchy/index.html"
 
 rm -rf "$site_tmp"
 trap - EXIT

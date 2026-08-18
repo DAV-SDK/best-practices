@@ -193,14 +193,20 @@ CSS
 results="[]"
 index_rows=""
 
-while IFS= read -r repo; do
-  [[ -z "$repo" || "$repo" == \#* ]] && continue
-  echo "Checking ${repo}..." >&2
+while IFS= read -r line; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  read -r repo branch <<<"$line"
+  echo "Checking ${repo}${branch:+@${branch}}..." >&2
 
-  result=$("$check_repo" "$repo")
+  if [[ -n "$branch" ]]; then
+    result=$("$check_repo" "$repo" "$branch")
+  else
+    result=$("$check_repo" "$repo")
+  fi
   results=$(jq --argjson r "$result" '. + [$r]' <<<"$results")
 
   score=$(jq -r .total_score <<<"$result")
+  checked_branch=$(jq -r .branch <<<"$result")
   cdash=$(jq -r .cdash_status <<<"$result")
   glsync=$(jq -r .gh_gl_sync <<<"$result")
   backport=$(jq -r .backport_action <<<"$result")
@@ -230,7 +236,7 @@ while IFS= read -r repo; do
 <main class="container">
   <h1>${repo}</h1>
   <p><a href="index.html"><img src="../../badges/${slug}.svg" alt="${score}/3 checks passing"></a></p>
-  <p><a href="https://github.com/${repo}">github.com/${repo}</a></p>
+  <p><a href="https://github.com/${repo}">github.com/${repo}</a> &middot; branch <code>${checked_branch}</code></p>
   <table>
   <thead><tr><th>Check</th><th>Result</th></tr></thead>
   <tbody>

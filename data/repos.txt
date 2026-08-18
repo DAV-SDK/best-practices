@@ -1,4 +1,6 @@
-LLNL/zfp
+# One "owner/repo" per line, optionally followed by a branch to check
+# instead of the repo's default branch, e.g. "owner/repo release-1.0".
+LLNL/zfp staging
 # mrzv/diy  # temporarily disabled
 ornladios/ADIOS2
 Viskores/viskores
