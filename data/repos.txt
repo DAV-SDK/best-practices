@@ -1,0 +1,10 @@
+LLNL/zfp
+# mrzv/diy  # temporarily disabled
+ornladios/ADIOS2
+Viskores/viskores
+# Kitware/ParaView  # temporarily disabled
+Alpine-DAV/ascent
+Parallel-NetCDF/PnetCDF
+# Kitware/catalyst  # temporarily disabled
+visit-dav/visit
+HDFGroup/hdf5

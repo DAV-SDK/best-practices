@@ -1,0 +1,7 @@
+name: Build
+on: [pull_request]
+jobs:
+  backport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: korthout/backport-action@v3

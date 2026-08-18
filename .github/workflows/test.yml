@@ -1,0 +1,21 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck
+        run: |
+          shellcheck bin/check-repo.sh \
+            scripts/generate-site-data.sh \
+            tests/run_tests.sh \
+            tests/fixtures/bin/gh
+
+      - name: Run tests
+        run: ./tests/run_tests.sh

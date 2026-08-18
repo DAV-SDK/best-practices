@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Fake `gh` CLI used by tests. Serves canned data from $GH_FAKE_FIXTURES
+# instead of talking to GitHub, based on the shape of `gh api <path>` calls
+# made by bin/check-repo.sh.
+set -euo pipefail
+
+fixtures_root="${GH_FAKE_FIXTURES:?GH_FAKE_FIXTURES must be set}"
+
+[[ "${1:-}" == "api" ]] || { echo "fake gh: unsupported command: ${1:-}" >&2; exit 1; }
+shift
+
+api_path=""
+for arg in "$@"; do
+  case "$arg" in
+    repos/*) api_path="$arg" ;;
+  esac
+done
+[[ -n "$api_path" ]] || { echo "fake gh: no api path in: $*" >&2; exit 1; }
+
+path_no_query="${api_path%%\?*}"
+repo_slug="${path_no_query#repos/}"
+
+case "$path_no_query" in
+  */git/trees/*)
+    owner_repo="${repo_slug%%/git/trees/*}"
+    cat "${fixtures_root}/${owner_repo//\//__}/tree.txt"
+    ;;
+  */contents/*)
+    owner_repo="${repo_slug%%/contents/*}"
+    file_path="${repo_slug#*/contents/}"
+    cat "${fixtures_root}/${owner_repo//\//__}/contents/${file_path}"
+    ;;
+  repos/*)
+    cat "${fixtures_root}/${repo_slug//\//__}/default_branch.txt"
+    ;;
+  *)
+    echo "fake gh: unhandled path: $path_no_query" >&2
+    exit 1
+    ;;
+esac

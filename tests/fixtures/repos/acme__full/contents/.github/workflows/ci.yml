@@ -1,0 +1,11 @@
+name: CI
+on: [push]
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Kitware/cdash-status@v1
+  backport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: korthout/backport-action@v3
