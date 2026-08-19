@@ -6,7 +6,8 @@
 #   cdash_server=URL     CDash server, if not https://open.cdash.org
 #   spack=NAME           Spack package name, if it differs from the part of
 #                        owner/repo after the slash, lowercased
-LLNL/zfp branch=staging
+#   corsa=NAME           CORSA catalog name
+LLNL/zfp branch=staging corsa=llnl/zfp
 # mrzv/diy  # temporarily disabled
 ornladios/ADIOS2 cdash=ADIOS
 Viskores/viskores cdash=Viskores
