@@ -38,7 +38,7 @@ rm -rf "$badges_dir" "$repos_dir"
 mkdir -p "$badges_dir" "$repos_dir"
 
 rm -f "${site_dir}/style.css"
-cp "${repo_root}/static/style.css" "${site_dir}/"
+cp "${repo_root}/static/style.css" "${site_dir}/style.css"
 
 generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
