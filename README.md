@@ -12,6 +12,7 @@ Each check is a standalone script in `checks.d/`:
 - `30-gh-gl-sync.sh` - uses the `gh-gl-sync` GitLab CI/CD component (in any
   YAML file in the repo)
 - `40-backport-action.sh` - uses the `korthout/backport-action` GitHub Action
+- `50-ossf-scorecard.sh` - uses the `ossf/scorecard-action` GitHub Action
 
 ### Adding a check
 
@@ -99,7 +100,7 @@ network access or GitHub authentication is required.
 
 ## Publishing
 
-`.github/workflows/update-site.yml` runs `generate-site-data.sh` every 4
-hours (and on manual dispatch) and publishes `site/` to the `gh-pages`
+`.github/workflows/update-site.yml` runs `generate-site-data.sh` every hour
+(and on manual dispatch) and publishes `site/` to the `gh-pages`
 branch. GitHub Pages must be configured (Settings > Pages) to serve from
 that branch.

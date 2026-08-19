@@ -415,6 +415,13 @@ cat >"${site_dir}/checks.html" <<HTML
   merged PR is labeled for backporting. Repos that use it reduce the manual,
   error-prone work of cherry-picking
   fixes onto release branches.</p>
+
+  <h2><code>ossf-scorecard</code></h2>
+  <p>The <code>ossf/scorecard-action</code> GitHub Action, from the
+  <a href="https://securityscorecards.dev">OpenSSF Scorecard</a> project. It
+  runs a battery of supply-chain security checks (branch protection, pinned
+  dependencies, dangerous workflow patterns, and more) and publishes a
+  score, giving an ongoing view of the repo's security posture.</p>
 </main>
 </body>
 </html>

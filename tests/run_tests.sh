@@ -59,7 +59,7 @@ run_case() {
     shift
   done
   shift
-  local desc="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5" expected_dash="$6"
+  local desc="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5" expected_dash="$6" expected_scorecard="$7"
   local output
   output=$("$check_repo" "$repo" "${extra_args[@]}")
 
@@ -69,27 +69,28 @@ run_case() {
   assert_eq "${desc} gh_gl_sync" "$expected_glsync" "$(jq -r .gh_gl_sync <<<"$output")"
   assert_eq "${desc} backport_action" "$expected_backport" "$(jq -r .backport_action <<<"$output")"
   assert_eq "${desc} cdash_dashboard" "$expected_dash" "$(jq -r .cdash_dashboard <<<"$output")"
+  assert_eq "${desc} ossf_scorecard" "$expected_scorecard" "$(jq -r .ossf_scorecard <<<"$output")"
 }
 
 # acme/full's default cdash-project guess ("full") is in the fake curl's
-# fixture list, so all four checks pass.
-run_case "acme/full" -- "acme/full" 4 true true true true
-run_case "acme/none" -- "acme/none" 0 false false false false
-run_case "acme/partial" -- "acme/partial" 2 false true true false
+# fixture list, so all five checks pass.
+run_case "acme/full" -- "acme/full" 5 true true true true true
+run_case "acme/none" -- "acme/none" 0 false false false false false
+run_case "acme/partial" -- "acme/partial" 2 false true true false false
 
 # branch selection: same repo, different result depending on which branch is checked
-run_case "acme/branchy" -- "acme/branchy@default" 0 false false false false
-run_case "acme/branchy" --branch "release-1.0" -- "acme/branchy@release-1.0" 3 true true true false
+run_case "acme/branchy" -- "acme/branchy@default" 0 false false false false false
+run_case "acme/branchy" --branch "release-1.0" -- "acme/branchy@release-1.0" 4 true true true false true
 
 # explicit --cdash-project override, independent of the repo's default guess
-run_case "acme/none" --cdash-project "override-project" -- "acme/none with cdash override" 1 false false false true
+run_case "acme/none" --cdash-project "override-project" -- "acme/none with cdash override" 1 false false false true false
 
 # --cdash-server: same project name exists on my.cdash.org but not on the
 # default open.cdash.org, so the server actually has to be honored
 run_case "acme/none" --cdash-project "hdf5-style-project" -- \
-  "acme/none, project on default server (should not exist)" 0 false false false false
+  "acme/none, project on default server (should not exist)" 0 false false false false false
 run_case "acme/none" --cdash-project "hdf5-style-project" --cdash-server "https://my.cdash.org" -- \
-  "acme/none, project on my.cdash.org" 1 false false false true
+  "acme/none, project on my.cdash.org" 1 false false false true false
 
 output=$("$check_repo" "acme/branchy" --branch "release-1.0")
 assert_eq "acme/branchy@release-1.0 reports requested branch" "release-1.0" "$(jq -r .branch <<<"$output")"
@@ -151,7 +152,7 @@ assert_grep "acme/none shows a fail in the matrix" 'data-label="backport-action"
 assert_grep "subpage rows carry data-label for mobile layout" 'data-label="Check"' "${site_tmp}/site/repos/acme__full/index.html"
 assert_grep "subpage has a cdash-dashboard row" '<code>cdash-dashboard</code>' "${site_tmp}/site/repos/acme__full/index.html"
 assert_grep "stylesheet defines mobile card breakpoint" '@media (max-width: 640px)' "${site_tmp}/site/style.css"
-assert_grep "acme/full badge is green (score 4)" "#4c1" "${site_tmp}/site/badges/acme__full.svg"
+assert_grep "acme/full badge is green (perfect score)" "#4c1" "${site_tmp}/site/badges/acme__full.svg"
 assert_grep "acme/none badge is red (score 0)" "#e05d44" "${site_tmp}/site/badges/acme__none.svg"
 assert_eq "results.json has 2 groups" "2" "$(jq '.groups | length' "${site_tmp}/site/results.json")"
 assert_eq "DAV Stack group has 2 repos" "2" \
