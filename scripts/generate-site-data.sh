@@ -39,6 +39,8 @@ mkdir -p "$badges_dir" "$repos_dir"
 
 generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+favicon_link='<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#128203;</text></svg>">'
+
 badge_color() {
   local score="$1"
   if [[ "$score" -eq "$total_checks" ]]; then
@@ -289,6 +291,7 @@ for group_def in "${group_defs[@]}"; do
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${repo} - DAV SDK Best Practices</title>
+${favicon_link}
 <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
@@ -356,6 +359,7 @@ cat >"${site_dir}/index.html" <<HTML
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAV SDK Best Practices</title>
+${favicon_link}
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -380,6 +384,7 @@ cat >"${site_dir}/checks.html" <<HTML
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checks explained - DAV SDK Best Practices</title>
+${favicon_link}
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
