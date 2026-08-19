@@ -14,6 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch previous history
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages-old
+
+      - name: Carry history forward
+        run: |
+          mkdir -p site
+          if [ -f gh-pages-old/history.jsonl ]; then
+            cp gh-pages-old/history.jsonl site/history.jsonl
+          fi
+          rm -rf gh-pages-old
+
       - name: Generate site data
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

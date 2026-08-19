@@ -7,7 +7,8 @@ matrix table per stack.
 Each check is a standalone script in `checks.d/`:
 
 - `10-cdash-dashboard.sh` - has a project dashboard on a CDash server
-  (default [open.cdash.org](https://open.cdash.org); configurable per repo)
+  (default [open.cdash.org](https://open.cdash.org); configurable per repo).
+  Retries up to 5 times, since open.cdash.org occasionally times out.
 - `20-cdash-status.sh` - uses the `Kitware/cdash-status` GitHub Action
 - `30-gh-gl-sync.sh` - uses the `gh-gl-sync` GitLab CI/CD component (in any
   YAML file in the repo)
@@ -104,3 +105,10 @@ network access or GitHub authentication is required.
 (and on manual dispatch) and publishes `site/` to the `gh-pages`
 branch. GitHub Pages must be configured (Settings > Pages) to serve from
 that branch.
+
+Each run also appends its `results.json` as one line to `site/history.jsonl`.
+The workflow carries that file forward from the previous `gh-pages` publish
+before regenerating, so it accumulates one line per run over time and is
+readable at a stable URL (e.g.
+`https://dav-sdk.github.io/best-practices/history.jsonl`) for tracking
+progress.

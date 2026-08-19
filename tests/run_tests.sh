@@ -139,6 +139,7 @@ assert_file "acme/full badge exists" "${site_tmp}/site/badges/acme__full.svg"
 assert_file "acme/full subpage exists" "${site_tmp}/site/repos/acme__full/index.html"
 assert_grep "index links to acme/full subpage" "repos/acme__full/index.html" "${site_tmp}/site/index.html"
 assert_grep "index links to checks.html" "checks.html" "${site_tmp}/site/index.html"
+assert_grep "index links to history.jsonl" 'href="history.jsonl"' "${site_tmp}/site/index.html"
 assert_grep "index has viewport meta tag" 'name="viewport"' "${site_tmp}/site/index.html"
 assert_grep "index links to stylesheet" 'href="style.css"' "${site_tmp}/site/index.html"
 assert_grep "index has a favicon" '<link rel="icon"' "${site_tmp}/site/index.html"
@@ -166,6 +167,19 @@ assert_file "acme/branchy subpage exists" "${site_tmp}/site/repos/acme__branchy/
 assert_grep "acme/branchy subpage shows the requested branch" "release-1.0" "${site_tmp}/site/repos/acme__branchy/index.html"
 assert_grep "acme/branchy subpage shows its custom cdash_server" "my.cdash.org" "${site_tmp}/site/repos/acme__branchy/index.html"
 assert_grep "acme/branchy badge is green (cdash_server override completes the score)" "#4c1" "${site_tmp}/site/badges/acme__branchy.svg"
+
+# history.jsonl: each run appends one line with that run's results.json
+assert_file "history.jsonl exists" "${site_tmp}/site/history.jsonl"
+assert_eq "history.jsonl has one line after one run" "1" "$(wc -l <"${site_tmp}/site/history.jsonl")"
+assert_eq "history.jsonl line is valid JSON" "0" "$(jq -e . >/dev/null <"${site_tmp}/site/history.jsonl"; echo $?)"
+assert_eq "history.jsonl line matches results.json" "$(jq -c . "${site_tmp}/site/results.json")" \
+  "$(tail -n1 "${site_tmp}/site/history.jsonl")"
+
+# Re-running against the same site dir should append a second line, not
+# overwrite the first (the workflow carries history.jsonl forward run to run).
+DAV_STACK_FILE="${site_tmp}/dav.txt" TOOL_STACK_FILE="${site_tmp}/tool.txt" SITE_DIR="${site_tmp}/site" \
+  "${repo_root}/scripts/generate-site-data.sh" >/dev/null 2>&1
+assert_eq "history.jsonl has two lines after a second run" "2" "$(wc -l <"${site_tmp}/site/history.jsonl")"
 
 rm -rf "$site_tmp"
 trap - EXIT

@@ -3,7 +3,15 @@
 set -euo pipefail
 
 project_encoded=$(jq -rn --arg s "$CDASH_PROJECT" '$s | @uri')
-http_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
-  "${CDASH_SERVER}/index.php?project=${project_encoded}")
+
+# open.cdash.org occasionally times out or drops a request; retry a few
+# times before concluding the project has no dashboard.
+attempts=5
+http_code="000"
+for ((i = 1; i <= attempts; i++)); do
+  http_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
+    "${CDASH_SERVER}/index.php?project=${project_encoded}" || echo "000")
+  [[ "$http_code" == "200" ]] && break
+done
 
 [[ "$http_code" == "200" ]]

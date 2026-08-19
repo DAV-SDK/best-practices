@@ -188,6 +188,12 @@ done
 jq -n --argjson groups "$groups_json" --arg generated_at "$generated_at" \
   '{generated_at: $generated_at, groups: $groups}' >"${site_dir}/results.json"
 
+# Append this run's results as one line to history.jsonl, so progress over
+# time can be pulled from a stable URL instead of only ever seeing the
+# latest snapshot. The workflow carries this file forward from the previous
+# gh-pages publish, so it accumulates run over run.
+jq -c . "${site_dir}/results.json" >>"${site_dir}/history.jsonl"
+
 matrix_header_cells="<th>Repository</th>"
 for name in "${check_names[@]}"; do
   matrix_header_cells="${matrix_header_cells}<th><code>${name}</code></th>"
@@ -221,6 +227,7 @@ ${favicon_link}
 <header class="site-header">
   <nav>
     <a href="checks.html">what do these checks mean?</a>
+    <a href="history.jsonl">history (JSON Lines)</a>
   </nav>
 </header>
 <main class="container">
