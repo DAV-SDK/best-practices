@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T19:23:11Z",
+  "generated_at": "2026-08-19T20:24:55Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -7,40 +7,40 @@
         {
           "repo": "LLNL/zfp",
           "branch": "staging",
-          "cdash_dashboard": true,
+          "cdash_dashboard": false,
           "cdash_status": true,
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
           "cdash_project": "zfp",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 2,
+          "total_score": 1,
           "total_checks": 5
         },
         {
           "repo": "ornladios/ADIOS2",
           "branch": "master",
-          "cdash_dashboard": true,
+          "cdash_dashboard": false,
           "cdash_status": true,
           "gh_gl_sync": true,
           "backport_action": false,
           "ossf_scorecard": true,
           "cdash_project": "ADIOS",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 4,
+          "total_score": 3,
           "total_checks": 5
         },
         {
           "repo": "Viskores/viskores",
           "branch": "main",
-          "cdash_dashboard": true,
+          "cdash_dashboard": false,
           "cdash_status": true,
           "gh_gl_sync": true,
           "backport_action": false,
           "ossf_scorecard": true,
           "cdash_project": "Viskores",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 4,
+          "total_score": 3,
           "total_checks": 5
         },
         {
