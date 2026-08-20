@@ -1,0 +1,4 @@
+[
+  {"repo": "spack", "version": "develop", "status": "rolling"},
+  {"repo": "spack", "version": "1.0.0", "status": "newest"}
+]

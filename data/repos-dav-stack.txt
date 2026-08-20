@@ -4,13 +4,15 @@
 #   cdash=NAME           CDash project name, if it differs from the part of
 #                        owner/repo after the slash
 #   cdash_server=URL     CDash server, if not https://open.cdash.org
+#   spack=NAME           Spack package name, if it differs from the part of
+#                        owner/repo after the slash, lowercased
 LLNL/zfp branch=staging
 # mrzv/diy  # temporarily disabled
 ornladios/ADIOS2 cdash=ADIOS
 Viskores/viskores cdash=Viskores
 # Kitware/ParaView  # temporarily disabled
 Alpine-DAV/ascent
-Parallel-NetCDF/PnetCDF
+Parallel-NetCDF/PnetCDF spack=parallel-netcdf
 # Kitware/catalyst  # temporarily disabled
 visit-dav/visit
 HDFGroup/hdf5 cdash=HDF5 cdash_server=https://my.cdash.org

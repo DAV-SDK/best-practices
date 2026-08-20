@@ -10,6 +10,7 @@ repo_root="$(cd "${script_dir}/.." && pwd)"
 
 check_repo="${repo_root}/bin/check-repo.sh"
 site_dir="${SITE_DIR:-${repo_root}/site}"
+history_file="${site_dir}/history.jsonl"
 export CHECKS_DIR="${CHECKS_DIR:-${repo_root}/checks.d}"
 
 dav_stack_file="${DAV_STACK_FILE:-${repo_root}/data/repos-dav-stack.txt}"
@@ -101,11 +102,13 @@ for group_def in "${group_defs[@]}"; do
     branch=""
     cdash_project=""
     cdash_server=""
+    spack_package=""
     for tok in "${tokens[@]:1}"; do
       case "$tok" in
         branch=*) branch="${tok#branch=}" ;;
         cdash_server=*) cdash_server="${tok#cdash_server=}" ;;
         cdash=*) cdash_project="${tok#cdash=}" ;;
+        spack=*) spack_package="${tok#spack=}" ;;
       esac
     done
 
@@ -115,6 +118,7 @@ for group_def in "${group_defs[@]}"; do
     [[ -n "$branch" ]] && args+=(--branch "$branch")
     [[ -n "$cdash_project" ]] && args+=(--cdash-project "$cdash_project")
     [[ -n "$cdash_server" ]] && args+=(--cdash-server "$cdash_server")
+    [[ -n "$spack_package" ]] && args+=(--spack-package "$spack_package")
     result=$("$check_repo" "${args[@]}")
     group_results=$(jq --argjson r "$result" '. + [$r]' <<<"$group_results")
 
@@ -122,6 +126,7 @@ for group_def in "${group_defs[@]}"; do
     checked_branch=$(jq -r .branch <<<"$result")
     cdash_project_checked=$(jq -r .cdash_project <<<"$result")
     cdash_server_checked=$(jq -r .cdash_server <<<"$result")
+    spack_package_checked=$(jq -r .spack_package <<<"$result")
 
     subpage_check_rows=""
     matrix_check_cells=""
@@ -166,6 +171,7 @@ ${favicon_link}
   ${subpage_check_rows}</tbody>
   </table>
   <p class="meta">CDash project checked: <code>${cdash_project_checked}</code> on <code>${cdash_server_checked}</code></p>
+  <p class="meta">Spack package checked: <code>${spack_package_checked}</code></p>
   <footer>Generated: ${generated_at}</footer>
 </main>
 </body>
@@ -192,7 +198,7 @@ jq -n --argjson groups "$groups_json" --arg generated_at "$generated_at" \
 # time can be pulled from a stable URL instead of only ever seeing the
 # latest snapshot. The workflow carries this file forward from the previous
 # gh-pages publish, so it accumulates run over run.
-jq -c . "${site_dir}/results.json" >>"${site_dir}/history.jsonl"
+jq -c . "${site_dir}/results.json" >>"$history_file"
 
 matrix_header_cells="<th>Repository</th>"
 for name in "${check_names[@]}"; do
@@ -289,6 +295,15 @@ ${favicon_link}
   runs a battery of supply-chain security checks (branch protection, pinned
   dependencies, dangerous workflow patterns, and more) and publishes a
   score, giving an ongoing view of the repo's security posture.</p>
+
+  <h2><code>spack-latest-release</code></h2>
+  <p>Whether the version currently packaged by <a href="https://spack.io">Spack</a>
+  matches the project's latest real release, using
+  <a href="https://repology.org">Repology</a> as the source of truth for
+  both (Repology's own version classification already excludes drafts,
+  pre-releases, and rc/alpha/beta-style versions). Repos that pass it can be
+  installed at their latest release through Spack right away, instead of
+  requiring a package update first.</p>
 </main>
 </body>
 </html>

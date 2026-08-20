@@ -8,12 +8,18 @@ Each check is a standalone script in `checks.d/`:
 
 - `10-cdash-dashboard.sh` - has a project dashboard on a CDash server
   (default [open.cdash.org](https://open.cdash.org); configurable per repo).
-  Retries up to 5 times, since open.cdash.org occasionally times out.
+  A failed request is always retried once, since open.cdash.org
+  occasionally times out.
 - `20-cdash-status.sh` - uses the `Kitware/cdash-status` GitHub Action
 - `30-gh-gl-sync.sh` - uses the `gh-gl-sync` GitLab CI/CD component (in any
   YAML file in the repo)
 - `40-backport-action.sh` - uses the `korthout/backport-action` GitHub Action
 - `50-ossf-scorecard.sh` - uses the `ossf/scorecard-action` GitHub Action
+- `60-spack-latest-release.sh` - the version currently packaged by
+  [Spack](https://spack.io) matches the project's latest real release,
+  using [Repology](https://repology.org) as the source of truth for both
+  (Repology's own version classification already excludes drafts,
+  pre-releases, and rc/alpha/beta-style versions)
 
 ### Adding a check
 
@@ -29,6 +35,7 @@ environment, and must exit 0 (check passes) or non-zero (fails):
 - `BRANCH` - the branch actually checked
 - `CDASH_PROJECT`, `CDASH_SERVER` - resolved CDash project name/server,
   for checks that need them
+- `SPACK_PACKAGE` - resolved Spack package name, for checks that need it
 
 ## Requirements
 
@@ -41,7 +48,8 @@ environment, and must exit 0 (check passes) or non-zero (fails):
 ## Checking a single repo
 
 ```sh
-./bin/check-repo.sh owner/repo [--branch BRANCH] [--cdash-project NAME] [--cdash-server URL]
+./bin/check-repo.sh owner/repo [--branch BRANCH] [--cdash-project NAME] \
+  [--cdash-server URL] [--spack-package NAME]
 ```
 
 `--branch` defaults to the repo's default branch; the repo is fetched with a
@@ -50,7 +58,9 @@ shallow (`--depth 1`) clone of just that branch, then checked locally.
 `--cdash-server` defaults to `https://open.cdash.org` - some projects run
 their own CDash server (e.g. `HDFGroup/hdf5`'s is `https://my.cdash.org`),
 and project names don't always match the GitHub repo name either (e.g.
-`ornladios/ADIOS2`'s project is `ADIOS`).
+`ornladios/ADIOS2`'s project is `ADIOS`). `--spack-package` defaults to the
+part of `owner/repo` after the slash, lowercased, and is likewise not always
+the actual Spack package name.
 
 ```json
 {
@@ -60,8 +70,10 @@ and project names don't always match the GitHub repo name either (e.g.
   "gh_gl_sync": false,
   "backport_action": false,
   "cdash_dashboard": false,
+  "spack_latest_release": false,
   "cdash_project": "repo",
   "cdash_server": "https://open.cdash.org",
+  "spack_package": "repo",
   "total_score": 0
 }
 ```
@@ -79,7 +91,7 @@ By default this reads `data/repos-dav-stack.txt` and
 
 ```
 ornladios/ADIOS2 branch=release_29 cdash=ADIOS
-HDFGroup/hdf5 cdash=HDF5 cdash_server=https://my.cdash.org
+HDFGroup/hdf5 cdash=HDF5 cdash_server=https://my.cdash.org spack=hdf5
 ```
 
 All three paths can be overridden, e.g. to do a dry run without touching the

@@ -9,6 +9,7 @@ repo_root="$(cd "${script_dir}/.." && pwd)"
 
 export GH_FAKE_FIXTURES="${script_dir}/fixtures/repos"
 export CURL_FAKE_CDASH_PROJECTS="${script_dir}/fixtures/cdash-projects.txt"
+export CURL_FAKE_REPOLOGY_DIR="${script_dir}/fixtures/repology"
 export PATH="${script_dir}/fixtures/bin:${PATH}"
 
 check_repo="${repo_root}/bin/check-repo.sh"
@@ -49,7 +50,7 @@ assert_grep() {
   fi
 }
 
-# run_case <repo> <extra check-repo.sh args...> -- <desc> <score> <cdash> <glsync> <backport> <cdash_dashboard>
+# run_case <repo> <extra check-repo.sh args...> -- <desc> <score> <cdash> <glsync> <backport> <cdash_dashboard> <scorecard> <spack>
 run_case() {
   local repo="$1"
   shift
@@ -59,7 +60,7 @@ run_case() {
     shift
   done
   shift
-  local desc="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5" expected_dash="$6" expected_scorecard="$7"
+  local desc="$1" expected_score="$2" expected_cdash="$3" expected_glsync="$4" expected_backport="$5" expected_dash="$6" expected_scorecard="$7" expected_spack="$8"
   local output
   output=$("$check_repo" "$repo" "${extra_args[@]}")
 
@@ -70,27 +71,47 @@ run_case() {
   assert_eq "${desc} backport_action" "$expected_backport" "$(jq -r .backport_action <<<"$output")"
   assert_eq "${desc} cdash_dashboard" "$expected_dash" "$(jq -r .cdash_dashboard <<<"$output")"
   assert_eq "${desc} ossf_scorecard" "$expected_scorecard" "$(jq -r .ossf_scorecard <<<"$output")"
+  assert_eq "${desc} spack_latest_release" "$expected_spack" "$(jq -r .spack_latest_release <<<"$output")"
 }
 
 # acme/full's default cdash-project guess ("full") is in the fake curl's
-# fixture list, so all five checks pass.
-run_case "acme/full" -- "acme/full" 5 true true true true true
-run_case "acme/none" -- "acme/none" 0 false false false false false
-run_case "acme/partial" -- "acme/partial" 2 false true true false false
+# fixture list and its default spack-package guess ("full") matches its
+# latest release in the fake Repology fixtures, so all six checks pass.
+run_case "acme/full" -- "acme/full" 6 true true true true true true
+run_case "acme/none" -- "acme/none" 0 false false false false false false
+run_case "acme/partial" -- "acme/partial" 2 false true true false false false
 
 # branch selection: same repo, different result depending on which branch is checked
-run_case "acme/branchy" -- "acme/branchy@default" 0 false false false false false
-run_case "acme/branchy" --branch "release-1.0" -- "acme/branchy@release-1.0" 4 true true true false true
+run_case "acme/branchy" -- "acme/branchy@default" 0 false false false false false false
+run_case "acme/branchy" --branch "release-1.0" -- "acme/branchy@release-1.0" 4 true true true false true false
 
 # explicit --cdash-project override, independent of the repo's default guess
-run_case "acme/none" --cdash-project "override-project" -- "acme/none with cdash override" 1 false false false true false
+run_case "acme/none" --cdash-project "override-project" -- "acme/none with cdash override" 1 false false false true false false
 
 # --cdash-server: same project name exists on my.cdash.org but not on the
 # default open.cdash.org, so the server actually has to be honored
 run_case "acme/none" --cdash-project "hdf5-style-project" -- \
-  "acme/none, project on default server (should not exist)" 0 false false false false false
+  "acme/none, project on default server (should not exist)" 0 false false false false false false
 run_case "acme/none" --cdash-project "hdf5-style-project" --cdash-server "https://my.cdash.org" -- \
-  "acme/none, project on my.cdash.org" 1 false false false true false
+  "acme/none, project on my.cdash.org" 1 false false false true false false
+
+# spack-latest-release: Repology is the source of truth for both the
+# latest real version (its "newest"-status entry, which already excludes
+# devel/rc-like versions) and what Spack currently packages. Real Spack
+# packages often have a second "rolling"/"develop" Repology entry alongside
+# the "newest" one, so the check must pick the "newest" spack entry
+# specifically, not just the first "spack" entry in the response.
+output=$("$check_repo" "acme/spacked")
+assert_eq "acme/spacked: Spack's newest entry matches, ignoring its rolling/devel entry" "true" \
+  "$(jq -r .spack_latest_release <<<"$output")"
+
+output=$("$check_repo" "acme/outdated")
+assert_eq "acme/outdated: Spack's version is behind Repology's newest version" "false" \
+  "$(jq -r .spack_latest_release <<<"$output")"
+
+output=$("$check_repo" "acme/nopkg")
+assert_eq "acme/nopkg: no Repology data at all for this project" "false" \
+  "$(jq -r .spack_latest_release <<<"$output")"
 
 output=$("$check_repo" "acme/branchy" --branch "release-1.0")
 assert_eq "acme/branchy@release-1.0 reports requested branch" "release-1.0" "$(jq -r .branch <<<"$output")"
@@ -151,6 +172,8 @@ assert_grep "index has a Tool Stack section" "<h2>Tool Stack</h2>" "${site_tmp}/
 assert_eq "index renders two matrix tables" "2" "$(grep -oF 'class="matrix"' "${site_tmp}/site/index.html" | wc -l)"
 assert_grep "index has a column per check" 'data-label="cdash-status"' "${site_tmp}/site/index.html"
 assert_grep "index has a cdash-dashboard column" 'data-label="cdash-dashboard"' "${site_tmp}/site/index.html"
+assert_grep "index has a spack-latest-release column" 'data-label="spack-latest-release"' "${site_tmp}/site/index.html"
+assert_grep "subpage shows the spack package checked" "Spack package checked" "${site_tmp}/site/repos/acme__full/index.html"
 assert_grep "acme/full shows a pass in the matrix" 'data-label="cdash-status"><span class="result-pass">' "${site_tmp}/site/index.html"
 assert_grep "acme/none shows a fail in the matrix" 'data-label="backport-action"><span class="result-fail">' "${site_tmp}/site/index.html"
 assert_grep "subpage rows carry data-label for mobile layout" 'data-label="Check"' "${site_tmp}/site/repos/acme__full/index.html"
@@ -166,7 +189,8 @@ assert_eq "Tool Stack group has 2 repos" "2" \
 assert_file "acme/branchy subpage exists" "${site_tmp}/site/repos/acme__branchy/index.html"
 assert_grep "acme/branchy subpage shows the requested branch" "release-1.0" "${site_tmp}/site/repos/acme__branchy/index.html"
 assert_grep "acme/branchy subpage shows its custom cdash_server" "my.cdash.org" "${site_tmp}/site/repos/acme__branchy/index.html"
-assert_grep "acme/branchy badge is green (cdash_server override completes the score)" "#4c1" "${site_tmp}/site/badges/acme__branchy.svg"
+assert_grep "acme/branchy badge is yellow (cdash_server override improves the score, but spack-latest-release still fails)" \
+  "#dfb317" "${site_tmp}/site/badges/acme__branchy.svg"
 
 # history.jsonl: each run appends one line with that run's results.json
 assert_file "history.jsonl exists" "${site_tmp}/site/history.jsonl"

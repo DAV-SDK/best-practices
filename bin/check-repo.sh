@@ -4,11 +4,11 @@
 #
 # Does a shallow (--depth 1) clone of the requested branch (or the repo's
 # default branch) once, then runs each checks.d/*.sh script against it.
-# Each check script gets REPO_DIR, REPO, BRANCH, CDASH_PROJECT, and
-# CDASH_SERVER in its environment, and must exit 0 (pass) or non-zero
-# (fail). Its filename (minus a leading "NN-" ordering prefix and the .sh
-# suffix, with dashes turned into underscores) becomes its JSON key, e.g.
-# checks.d/20-cdash-status.sh -> "cdash_status".
+# Each check script gets REPO_DIR, REPO, BRANCH, CDASH_PROJECT,
+# CDASH_SERVER, and SPACK_PACKAGE in its environment, and must exit 0
+# (pass) or non-zero (fail). Its filename (minus a leading "NN-" ordering
+# prefix and the .sh suffix, with dashes turned into underscores) becomes
+# its JSON key, e.g. checks.d/20-cdash-status.sh -> "cdash_status".
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,12 +18,14 @@ DEFAULT_CDASH_SERVER="https://open.cdash.org"
 usage() {
   cat <<EOF
 Usage: $(basename "$0") <owner/repo> [--branch BRANCH] [--cdash-project NAME]
-       [--cdash-server URL]
+       [--cdash-server URL] [--spack-package NAME]
 
 Runs every check script in ${checks_dir} against <owner/repo> (at BRANCH,
-default: the repo's default branch). NAME defaults to the part of
+default: the repo's default branch). The CDash NAME defaults to the part of
 <owner/repo> after the slash, and URL defaults to ${DEFAULT_CDASH_SERVER};
-both are only used by checks that look up a CDash dashboard.
+both are only used by checks that look up a CDash dashboard. The Spack NAME
+defaults to <owner/repo>'s repo part, lowercased, and is only used by checks
+that look up a Spack package.
 
 Prints a JSON object with one boolean per check script and a total_score.
 EOF
@@ -40,6 +42,7 @@ shift
 branch=""
 cdash_project=""
 cdash_server="$DEFAULT_CDASH_SERVER"
+spack_package=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --branch)
@@ -57,6 +60,11 @@ while [[ $# -gt 0 ]]; do
       cdash_server="$2"
       shift 2
       ;;
+    --spack-package)
+      [[ $# -ge 2 ]] || { usage; exit 1; }
+      spack_package="$2"
+      shift 2
+      ;;
     *)
       usage
       exit 1
@@ -64,6 +72,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 cdash_project="${cdash_project:-${repo##*/}}"
+spack_package="${spack_package:-$(tr '[:upper:]' '[:lower:]' <<<"${repo##*/}")}"
 
 workdir=$(mktemp -d)
 trap 'rm -rf "$workdir"' EXIT
@@ -96,6 +105,7 @@ for check_script in "${checks_dir}"/*.sh; do
   passed=false
   if REPO_DIR="$workdir" REPO="$repo" BRANCH="$checked_branch" \
      CDASH_PROJECT="$cdash_project" CDASH_SERVER="$cdash_server" \
+     SPACK_PACKAGE="$spack_package" \
      "$check_script"; then
     passed=true
     total_score=$((total_score + 1))
@@ -105,6 +115,7 @@ for check_script in "${checks_dir}"/*.sh; do
 done
 
 jq --arg cdash_project "$cdash_project" --arg cdash_server "$cdash_server" \
+  --arg spack_package "$spack_package" \
   --argjson total_score "$total_score" --argjson total_checks "$total_checks" \
-  '. + {cdash_project: $cdash_project, cdash_server: $cdash_server, total_score: $total_score, total_checks: $total_checks}' \
+  '. + {cdash_project: $cdash_project, cdash_server: $cdash_server, spack_package: $spack_package, total_score: $total_score, total_checks: $total_checks}' \
   <<<"$result"
