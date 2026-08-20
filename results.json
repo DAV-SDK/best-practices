@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-20T14:34:20Z",
+  "generated_at": "2026-08-20T15:31:37Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -57,11 +57,11 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
-          "spack_latest_release": false,
+          "spack_latest_release": true,
           "cdash_project": "ascent",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "ascent",
-          "total_score": 0,
+          "total_score": 1,
           "total_checks": 6
         },
         {
@@ -72,11 +72,11 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
-          "spack_latest_release": false,
+          "spack_latest_release": true,
           "cdash_project": "PnetCDF",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "parallel-netcdf",
-          "total_score": 0,
+          "total_score": 1,
           "total_checks": 6
         },
         {
@@ -102,11 +102,11 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": true,
-          "spack_latest_release": false,
+          "spack_latest_release": true,
           "cdash_project": "HDF5",
           "cdash_server": "https://my.cdash.org",
           "spack_package": "hdf5",
-          "total_score": 2,
+          "total_score": 3,
           "total_checks": 6
         }
       ]
