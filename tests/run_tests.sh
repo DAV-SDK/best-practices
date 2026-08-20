@@ -150,7 +150,7 @@ trap 'rm -rf "$site_tmp"' EXIT
 printf 'acme/full\nacme/none\n' >"${site_tmp}/dav.txt"
 printf 'acme/partial\nacme/branchy branch=release-1.0 cdash=hdf5-style-project cdash_server=https://my.cdash.org\n' >"${site_tmp}/tool.txt"
 DAV_STACK_FILE="${site_tmp}/dav.txt" TOOL_STACK_FILE="${site_tmp}/tool.txt" SITE_DIR="${site_tmp}/site" \
-  "${repo_root}/scripts/generate-site-data.sh" >/dev/null 2>&1
+  "${repo_root}/scripts/generate-site-data.sh" #>/dev/null 2>&1
 
 assert_file "site index.html exists" "${site_tmp}/site/index.html"
 assert_file "site results.json exists" "${site_tmp}/site/results.json"
