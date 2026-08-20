@@ -245,7 +245,7 @@ for group_def in "${group_defs[@]}"; do
 
     # OpenSSF Scorecard
     img_name="$badges_dir/$project_name-openssf-scorecard.svg"
-    wget -O "$img_name" "https://api.scorecard.dev/projects/github.com/$repo/badge"
+    wget --content-on-error -O "$img_name" "https://api.scorecard.dev/projects/github.com/$repo/badge"
     other_badges_section+="
       <tr>
         <td>$repo</td>
@@ -258,7 +258,7 @@ for group_def in "${group_defs[@]}"; do
 
     # Linux Foundation Insights
     img_name="$badges_dir/$project_name-lfx.svg"
-    wget -O "$img_name" "https://insights.linuxfoundation.org/api/badge/health-score?project=$project_name"
+    wget --content-on-error -O "$img_name" "https://insights.linuxfoundation.org/api/badge/health-score?project=$project_name"
     other_badges_section+="<td>"
     if [[ -s $img_name ]]; then
       other_badges_section+="<a href=\"https://insights.linuxfoundation.org/project/$project_name\"> <img src=\"$img_name\"> </a>"
