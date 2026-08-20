@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T23:20:39Z",
+  "generated_at": "2026-08-20T01:07:32Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -12,10 +12,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": true,
           "cdash_project": "zfp",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 1,
-          "total_checks": 5
+          "spack_package": "zfp",
+          "total_score": 2,
+          "total_checks": 6
         },
         {
           "repo": "ornladios/ADIOS2",
@@ -25,10 +27,12 @@
           "gh_gl_sync": true,
           "backport_action": false,
           "ossf_scorecard": true,
+          "spack_latest_release": true,
           "cdash_project": "ADIOS",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 3,
-          "total_checks": 5
+          "spack_package": "adios2",
+          "total_score": 4,
+          "total_checks": 6
         },
         {
           "repo": "Viskores/viskores",
@@ -38,10 +42,12 @@
           "gh_gl_sync": true,
           "backport_action": false,
           "ossf_scorecard": true,
+          "spack_latest_release": true,
           "cdash_project": "Viskores",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 3,
-          "total_checks": 5
+          "spack_package": "viskores",
+          "total_score": 4,
+          "total_checks": 6
         },
         {
           "repo": "Alpine-DAV/ascent",
@@ -51,10 +57,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": true,
           "cdash_project": "ascent",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 0,
-          "total_checks": 5
+          "spack_package": "ascent",
+          "total_score": 1,
+          "total_checks": 6
         },
         {
           "repo": "Parallel-NetCDF/PnetCDF",
@@ -64,10 +72,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": true,
           "cdash_project": "PnetCDF",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 0,
-          "total_checks": 5
+          "spack_package": "parallel-netcdf",
+          "total_score": 1,
+          "total_checks": 6
         },
         {
           "repo": "visit-dav/visit",
@@ -77,10 +87,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": false,
           "cdash_project": "visit",
           "cdash_server": "https://open.cdash.org",
+          "spack_package": "visit",
           "total_score": 0,
-          "total_checks": 5
+          "total_checks": 6
         },
         {
           "repo": "HDFGroup/hdf5",
@@ -90,10 +102,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": true,
+          "spack_latest_release": true,
           "cdash_project": "HDF5",
           "cdash_server": "https://my.cdash.org",
-          "total_score": 2,
-          "total_checks": 5
+          "spack_package": "hdf5",
+          "total_score": 3,
+          "total_checks": 6
         }
       ]
     },
@@ -108,10 +122,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": true,
           "cdash_project": "papi",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 0,
-          "total_checks": 5
+          "spack_package": "papi",
+          "total_score": 1,
+          "total_checks": 6
         },
         {
           "repo": "UO-OACISS/tau2",
@@ -121,10 +137,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": false,
           "cdash_project": "tau2",
           "cdash_server": "https://open.cdash.org",
+          "spack_package": "tau2",
           "total_score": 0,
-          "total_checks": 5
+          "total_checks": 6
         },
         {
           "repo": "darshan-hpc/darshan",
@@ -134,10 +152,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
+          "spack_latest_release": false,
           "cdash_project": "darshan",
           "cdash_server": "https://open.cdash.org",
+          "spack_package": "darshan",
           "total_score": 0,
-          "total_checks": 5
+          "total_checks": 6
         },
         {
           "repo": "dyninst/dyninst",
@@ -147,10 +167,12 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": true,
+          "spack_latest_release": true,
           "cdash_project": "dyninst",
           "cdash_server": "https://open.cdash.org",
-          "total_score": 1,
-          "total_checks": 5
+          "spack_package": "dyninst",
+          "total_score": 2,
+          "total_checks": 6
         }
       ]
     }

@@ -47,6 +47,15 @@
   runs a battery of supply-chain security checks (branch protection, pinned
   dependencies, dangerous workflow patterns, and more) and publishes a
   score, giving an ongoing view of the repo's security posture.</p>
+
+  <h2><code>spack-latest-release</code></h2>
+  <p>Whether the version currently packaged by <a href="https://spack.io">Spack</a>
+  matches the project's latest real release, using
+  <a href="https://repology.org">Repology</a> as the source of truth for
+  both (Repology's own version classification already excludes drafts,
+  pre-releases, and rc/alpha/beta-style versions). Repos that pass it can be
+  installed at their latest release through Spack right away, instead of
+  requiring a package update first.</p>
 </main>
 </body>
 </html>
