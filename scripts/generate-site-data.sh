@@ -219,6 +219,75 @@ for group_def in "${group_defs[@]}"; do
 "
 done
 
+declare other_badges_section=""
+for group_def in "${group_defs[@]}"; do
+  label="${group_def%%:*}"
+  file="${group_def#*:}"
+
+  other_badges_section+="
+  <h2>${label}</h2>
+  <table class=\"matrix\">
+  <thead>
+    <tr>
+      <th>Repository</th>
+      <th>OpenSSF Scorecard</th>
+      <th>LF Insights</th>
+      <th>Corsa</th>
+    </tr>"
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+
+    read -ra tokens <<<"$line"
+    repo="${tokens[0]}"
+    
+    IFS='/' read -ra _tmp <<<"$repo"
+    project_name="${_tmp[1]}"
+
+    # OpenSSF Scorecard
+    img_name="$badges_dir/$project_name-openssf-scorecard.svg"
+    (wget -O "$img_name" "https://api.scorecard.dev/projects/github.com/$repo/badge" || true)
+    other_badges_section+="
+      <tr>
+        <td>$repo</td>
+        <td>"
+    if ! grep -q "invalid repo path" "$img_name"; then
+      other_badges_section+="<a href=\"https://scorecard.dev/viewer/?uri=github.com/$repo\"> <img src=\"$img_name\"> </a>"
+    fi
+    other_badges_section+="</td>
+        "
+
+    # Linux Foundation Insights
+    img_name="$badges_dir/$project_name-lfx.svg"
+    (wget -O "$img_name" "https://insights.linuxfoundation.org/api/badge/health-score?project=$project_name" || true)
+    other_badges_section+="<td>"
+    if [[ -s $img_name ]]; then
+      other_badges_section+="<a href=\"https://insights.linuxfoundation.org/project/$project_name\"> <img src=\"$img_name\"> </a>"
+    fi
+    other_badges_section+="</td>
+        "
+
+    corsa_name=$repo
+    for tok in "${tokens[@]:1}"; do
+      case "$tok" in
+        corsa=*) corsa_name="${tok#corsa=}" ;;
+      esac
+    done
+    # CORSA Catalog
+    other_badges_section+="<td>
+      <a href=\"https://corsa.center/dashboard/catalog/?category=all\&repo=$corsa_name\"> entry </a>
+    </td>
+    "
+
+  other_badges_section+="</tr>"
+  done < "$file"
+  
+  other_badges_section+="
+  </thead>
+  <tbody>
+  </table>
+"
+done
+
 cat >"${site_dir}/index.html" <<HTML
 <!doctype html>
 <html lang="en">
