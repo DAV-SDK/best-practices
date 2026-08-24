@@ -1,0 +1,69 @@
+[
+  {
+    "repo": "LLNL/zfp",
+    "branch": "staging",
+    "stack": "DAV"
+  },
+  {
+    "disabled": "true",
+    "repo": "mrzv/diy",
+    "stack": "DAV"
+  },
+  {
+    "repo": "ornladios/ADIOS2",
+    "cdash": "ADIOS",
+    "stack": "DAV",
+    "spack": "adios2"
+  },
+  {
+    "repo": "Viskores/viskores",
+    "cdash": "Viskores",
+    "stack": "DAV"
+  },
+  {
+    "disabled": "true",
+    "repo": "Kitware/ParaView",
+    "stack": "DAV"
+  },
+  {
+    "repo": "Alpine-DAV/ascent",
+    "stack": "DAV"
+  },
+  {
+    "repo": "Parallel-NetCDF/PnetCDF",
+    "spack": "parallel-netcdf",
+    "stack": "DAV"
+  },
+  {
+    "disabled": "true",
+    "repo": "Kitware/catalyst",
+    "stack": "DAV"
+  },
+  {
+    "repo": "visit-dav/visit",
+    "stack": "DAV"
+  },
+  {
+    "repo": "HDFGroup/hdf5",
+    "cdash": "HDF5",
+    "cdash_server": "https://my.cdash.org",
+    "stack": "DAV"
+  },
+  {
+    "repo": "icl-utk-edu/papi",
+    "stack": "Tools"
+  },
+  {
+    "repo": "UO-OACISS/tau2",
+    "stack": "Tools"
+  },
+  {
+    "repo": "darshan-hpc/darshan",
+    "spack": "python:darshan",
+    "stack": "Tools"
+  },
+  {
+    "repo": "dyninst/dyninst",
+    "stack": "Tools"
+  }
+]
