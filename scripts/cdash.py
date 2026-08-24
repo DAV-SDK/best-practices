@@ -1,4 +1,5 @@
 import logger
+import os
 import requests
 from requests.adapters import Retry, HTTPAdapter
 
@@ -33,3 +34,19 @@ def check_dashboard_exists(url: str) -> bool:
         return False
 
     return True
+
+
+def check_status_exists(git_workflow_dir: str) -> bool:
+    """Check if the Kitware/cdash-status workflow is used"""
+
+    for root, _, files in os.walk(git_workflow_dir):
+        for f in files:
+            if not f.endswith((".yaml", ".yml")):
+                continue
+
+            with open(os.path.join(root, f)) as fd:
+                for line in fd.readlines():
+                    if "Kitware/cdash-status" in line:
+                        return True
+
+    return False

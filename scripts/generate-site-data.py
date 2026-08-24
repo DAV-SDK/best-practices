@@ -38,6 +38,9 @@ for r in all_repos:
     # fmt: off
     r["checks"] = [
         # Is there a CDash dashboard?
-        Check("cdash dashboard", cdash.check_dashboard_exists(r["cdash_url"]))
+        Check("cdash dashboard", cdash.check_dashboard_exists(r["cdash_url"])),
+
+        # Does it use the Kitware/cdash-status action?
+        Check("cdash status", cdash.check_status_exists(r["clone_dir"]))
     ]
     # fmt: on
