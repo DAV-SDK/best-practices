@@ -1,4 +1,6 @@
+import git
 import json
+import logger
 
 
 def load(file: str):
@@ -16,3 +18,38 @@ def load(file: str):
         r["name"] = project_name
 
     return repos
+
+
+def clone(repo, skip: bool) -> None:
+    """git-clone all of the repositories"""
+
+    # We only ever inspect YAML files, so skip fetching actual git-lfs blob
+    # content (large binary test data etc.) during checkout: it's unneeded
+    # and can fail the whole clone if the repo's LFS budget is exhausted.
+    env = {"GIT_LFS_SKIP_SMUDGE": "1"}
+
+    opts = [" --depth 1", "--single-branch", "--quiet"]
+
+    if "branch" in repo:
+        opts.append(f"--branch \"{repo['branch']}\"")
+
+    url = f"https://github.com/{repo['repo']}"
+
+    repo["clone_dir"] = f"git-clones/{repo['name']}"
+
+    gitrepo = None
+    if not skip:
+        logger.info(f"Cloning {repo['repo']}")
+        gitrepo = git.Repo.clone_from(
+            url, to_path=repo["clone_dir"], env=env, multi_options=opts
+        )
+
+    if not "branch" in repo:
+        if not gitrepo:
+            gitrepo = git.Repo(repo["clone_dir"])
+
+        try:
+            repo["branch"] = gitrepo.active_branch.name
+        except TypeError:
+            # Indicates HEAD is detached
+            repo["branch"] = "detached"

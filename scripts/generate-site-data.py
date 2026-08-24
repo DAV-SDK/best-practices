@@ -11,6 +11,7 @@ parser.add_argument(
     help="The location to store the generated website files",
 )
 parser.add_argument("--verbose", action="store_true")
+parser.add_argument("--skip-clone", action="store_true")
 
 args = parser.parse_args()
 site_directory = args.site_directory
@@ -24,6 +25,9 @@ all_repos = repos.load("data/repos.json")
 for r in all_repos:
     # Make sure all cdash configs are set up
     cdash.init_urls(r)
+
+    # git-clone the repo
+    repos.clone(r, args.skip_clone)
 
 
 Check = namedtuple("Check", "name status")
