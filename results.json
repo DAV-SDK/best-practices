@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-24T14:39:30Z",
+  "generated_at": "2026-08-24T15:37:18Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -152,11 +152,11 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": false,
-          "spack_latest_release": true,
+          "spack_latest_release": false,
           "cdash_project": "darshan",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "python:darshan",
-          "total_score": 1,
+          "total_score": 0,
           "total_checks": 6
         },
         {
@@ -167,11 +167,11 @@
           "gh_gl_sync": false,
           "backport_action": false,
           "ossf_scorecard": true,
-          "spack_latest_release": true,
+          "spack_latest_release": false,
           "cdash_project": "dyninst",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "dyninst",
-          "total_score": 2,
+          "total_score": 1,
           "total_checks": 6
         }
       ]
