@@ -1,8 +1,10 @@
 import argparse
 import backport
+import badges
 import cdash
 from collections import namedtuple
 import logger
+import os
 import ossf
 import repos
 import spack
@@ -33,6 +35,10 @@ for r in all_repos:
     # git-clone the repo
     repos.clone(r, args.skip_clone)
 
+# Create site layout
+if not os.path.exists(f"{site_directory}/badges"):
+    os.makedirs(f"{site_directory}/badges")
+
 
 Check = namedtuple("Check", "name status")
 
@@ -60,3 +66,8 @@ for r in all_repos:
         Check("spack latest release", spack.check_spack_status(r))
     ]
     # fmt: on
+
+    # Score stats
+    r["score"] = len([1 for c in r["checks"] if c.status])
+
+    badges.generate_peso(r, site_directory)
