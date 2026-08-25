@@ -1,4 +1,5 @@
 import argparse
+import backport
 import cdash
 from collections import namedtuple
 import logger
@@ -45,6 +46,9 @@ for r in all_repos:
         Check("cdash status", cdash.check_status_exists(r["clone_dir"])),
 
         # Check if the gh-gl-sync action is used
-        Check("gh-gl sync", sync_script.check_sync_exists(r["clone_dir"]))
+        Check("gh-gl sync", sync_script.check_sync_exists(r["clone_dir"])),
+
+        # Check if the korthout/backport-action action is used
+        Check("backport action", backport.check_backport_exists(r["clone_dir"]))
     ]
     # fmt: on
