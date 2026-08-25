@@ -3,6 +3,7 @@ import backport
 import cdash
 from collections import namedtuple
 import logger
+import ossf
 import repos
 import sync_script
 
@@ -49,6 +50,9 @@ for r in all_repos:
         Check("gh-gl sync", sync_script.check_sync_exists(r["clone_dir"])),
 
         # Check if the korthout/backport-action action is used
-        Check("backport action", backport.check_backport_exists(r["clone_dir"]))
+        Check("backport action", backport.check_backport_exists(r["clone_dir"])),
+
+        # Check if the OpenSSF scorecard exists
+        Check("ossf scorecard", ossf.check_scorecard_exists(r["clone_dir"]))
     ]
     # fmt: on
