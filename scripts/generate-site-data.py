@@ -3,11 +3,13 @@ import backport
 import badges
 import cdash
 from collections import namedtuple
+import datetime
 import logger
 import os
 import ossf
 import repos
 import shutil
+import sitegen
 import spack
 import sync_script
 
@@ -43,6 +45,10 @@ if not os.path.exists(f"{site_directory}/badges"):
 
 Check = namedtuple("Check", "name status")
 
+generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
+    "%Y-%m-%dT%H:%M:%SZ"
+)
+
 # Run the checks
 for r in all_repos:
 
@@ -73,6 +79,9 @@ for r in all_repos:
 
     badges.generate_peso(r, site_directory)
 
+
+# Generate site
+sitegen.make_root_page(all_repos, site_directory, generated_at)
 
 # Copy generated files into the site directory
 shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))
