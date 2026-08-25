@@ -5,6 +5,7 @@ from collections import namedtuple
 import logger
 import ossf
 import repos
+import spack
 import sync_script
 
 parser = argparse.ArgumentParser()
@@ -53,6 +54,9 @@ for r in all_repos:
         Check("backport action", backport.check_backport_exists(r["clone_dir"])),
 
         # Check if the OpenSSF scorecard exists
-        Check("ossf scorecard", ossf.check_scorecard_exists(r["clone_dir"]))
+        Check("ossf scorecard", ossf.check_scorecard_exists(r["clone_dir"])),
+
+        # Check if spack package has latest version
+        Check("spack latest release", spack.check_spack_status(r))
     ]
     # fmt: on

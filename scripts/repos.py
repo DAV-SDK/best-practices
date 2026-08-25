@@ -17,6 +17,9 @@ def load(file: str):
         _, project_name = r["repo"].split("/")
         r["name"] = project_name
 
+        if not "spack" in r:
+            r["spack"] = project_name
+
     return repos
 
 
