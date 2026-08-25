@@ -7,6 +7,7 @@ import logger
 import os
 import ossf
 import repos
+import shutil
 import spack
 import sync_script
 
@@ -71,3 +72,7 @@ for r in all_repos:
     r["score"] = len([1 for c in r["checks"] if c.status])
 
     badges.generate_peso(r, site_directory)
+
+
+# Copy generated files into the site directory
+shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))
