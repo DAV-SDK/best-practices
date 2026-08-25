@@ -1,4 +1,6 @@
 import argparse
+import cdash
+from collections import namedtuple
 import logger
 import repos
 
@@ -18,3 +20,20 @@ if args.verbose:
 
 
 all_repos = repos.load("data/repos.json")
+
+for r in all_repos:
+    # Make sure all cdash configs are set up
+    cdash.init_urls(r)
+
+
+Check = namedtuple("Check", "name status")
+
+# Run the checks
+for r in all_repos:
+
+    # fmt: off
+    r["checks"] = [
+        # Is there a CDash dashboard?
+        Check("cdash dashboard", cdash.check_dashboard_exists(r["cdash_url"]))
+    ]
+    # fmt: on
