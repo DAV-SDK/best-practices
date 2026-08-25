@@ -3,6 +3,7 @@ import cdash
 from collections import namedtuple
 import logger
 import repos
+import sync_script
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -41,6 +42,9 @@ for r in all_repos:
         Check("cdash dashboard", cdash.check_dashboard_exists(r["cdash_url"])),
 
         # Does it use the Kitware/cdash-status action?
-        Check("cdash status", cdash.check_status_exists(r["clone_dir"]))
+        Check("cdash status", cdash.check_status_exists(r["clone_dir"])),
+
+        # Check if the gh-gl-sync action is used
+        Check("gh-gl sync", sync_script.check_sync_exists(r["clone_dir"]))
     ]
     # fmt: on
