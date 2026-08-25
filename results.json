@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T16:35:07Z",
+  "generated_at": "2026-08-25T17:29:58Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -40,13 +40,13 @@
           "cdash_dashboard": true,
           "cdash_status": true,
           "gh_gl_sync": true,
-          "backport_action": false,
+          "backport_action": true,
           "ossf_scorecard": true,
           "spack_latest_release": true,
           "cdash_project": "Viskores",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "viskores",
-          "total_score": 5,
+          "total_score": 6,
           "total_checks": 6
         },
         {
