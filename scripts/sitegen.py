@@ -1,9 +1,66 @@
-import datetime
 import os
 
 
-def make_repo_details_page(repo, output_dir: str) -> None:
-    pass
+def make_repo_details_pages(repos, output_dir: str, generated_at: str) -> None:
+    logger.info("Writing project-speicific details pages")
+
+    for r in repos:
+        cur_dir = f"{output_dir}/repos/{r['name']}"
+        os.makedirs(cur_dir, exist_ok=True)
+        with open(f"{cur_dir}/index.html", "w") as fd:
+            fd.write(f"""
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{r['repo']} - DAV SDK Best Practices</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a href="../../index.html">&larr; all repositories</a>
+    <a href="../../checks.html">what do these checks mean?</a>
+  </nav>
+</header>
+<main class="container">
+  <h1>{r['repo']}</h1>
+  <p><a href="index.html"><img src="../../badges/{r['name']}.svg"></a></p>
+  <p><a href="https://github.com/{r['repo']}">github.com/{r['repo']}</a> &middot; branch <code>{r['branch']}</code></p>
+  <table>
+  <thead>
+      <tr>
+      <th>Check</th>
+      <th>Result</th>
+  </tr>
+  </thead>
+  <tbody>
+""")
+            for c in r["checks"]:
+                status = '<span class="result-fail">no</span>'
+                if c.status:
+                    status = '<span class="result-pass">yes</span>'
+
+                fd.write(f"""
+    <tr>
+        <td data-label="Check"><code>{c.name}</code>
+        <td data-label="Result">{status}</td>
+    </tr>
+    """)
+
+            fd.write(f"""
+  </tbody>
+  </table>
+  <p class="meta">CDash project checked: <code>{r['cdash']}</code> on <code>{r['cdash_server']}</code></p>
+  <p class="meta">Spack package checked: <code>{r['spack']}</code></p>
+  <footer>Generated: {generated_at}</footer>
+</main>
+</body>
+</html>
+
+""")
 
 
 def _write_section(all_repos, label: str, fd) -> None:

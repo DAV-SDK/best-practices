@@ -82,6 +82,7 @@ for r in all_repos:
 
 # Generate site
 sitegen.make_root_page(all_repos, site_directory, generated_at)
+sitegen.make_repo_details_pages(all_repos, site_directory, generated_at)
 
 # Copy generated files into the site directory
 shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))
