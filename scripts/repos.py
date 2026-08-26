@@ -23,6 +23,9 @@ def load(file: str):
         if not "corsa" in r:
             r["corsa"] = r["repo"]
 
+        if not "git_provider" in r:
+            r["git_provider"] = "github.com"
+
     return repos
 
 
@@ -39,7 +42,7 @@ def clone(repo, skip: bool) -> None:
     if "branch" in repo:
         opts.append(f"--branch \"{repo['branch']}\"")
 
-    url = f"https://github.com/{repo['repo']}"
+    url = f"https://{repo['git_provider']}/{repo['repo']}"
 
     repo["clone_dir"] = f"git-clones/{repo['name']}"
 

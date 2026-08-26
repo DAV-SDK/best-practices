@@ -29,7 +29,7 @@ def make_repo_details_pages(repos, output_dir: str, generated_at: str) -> None:
 <main class="container">
   <h1>{r['repo']}</h1>
   <p><a href="index.html"><img src="../../badges/{r['name']}.svg"></a></p>
-  <p><a href="https://github.com/{r['repo']}">github.com/{r['repo']}</a> &middot; branch <code>{r['branch']}</code></p>
+  <p><a href="https://{r['git_provider']}/{r['repo']}">{r['git_provider']}/{r['repo']}</a> &middot; branch <code>{r['branch']}</code></p>
   <table>
   <thead>
       <tr>

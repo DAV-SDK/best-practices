@@ -55,6 +55,11 @@
     "stack": "Tools"
   },
   {
+    "repo": "hpctoolkit/hpctoolkit",
+	  "git_provider": "gitlab.com",
+    "stack": "Tools"
+  },
+  {
     "repo": "UO-OACISS/tau2",
     "stack": "Tools"
   },

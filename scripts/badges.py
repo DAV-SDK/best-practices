@@ -85,7 +85,7 @@ def fetch_openssf(repo, site_dir: str) -> None:
     retries = Retry(total=2, backoff_factor=1)
     s.mount("http://", HTTPAdapter(max_retries=retries))
 
-    url = f"https://api.scorecard.dev/projects/github.com/{repo['repo']}/badge"
+    url = f"https://api.scorecard.dev/projects/{repo['git_provider']}/{repo['repo']}/badge"
 
     response = s.get(url)
 
@@ -102,7 +102,7 @@ def fetch_openssf(repo, site_dir: str) -> None:
 
     repo["scorecard"] = {
         "file": filename,
-        "url": f"https://scorecard.dev/viewer/?uri=github.com/{repo['repo']}",
+        "url": f"https://scorecard.dev/viewer/?uri={repo['git_provider']}/{repo['repo']}",
     }
 
     # The reponse is just text describing an SVG, so we can save it as-is
