@@ -4,6 +4,7 @@ import badges
 import cdash
 from collections import namedtuple
 import datetime
+import json
 import logger
 import os
 import ossf
@@ -88,3 +89,8 @@ sitegen.make_repo_details_pages(all_repos, site_directory, generated_at)
 shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))
 shutil.copyfile("static/style.css", os.path.join(site_directory, "style.css"))
 shutil.copyfile("static/checks.html", os.path.join(site_directory, "checks.html"))
+
+
+# Export results to the history
+with open(os.path.join(site_directory, "history.jsonl"), "a") as fd:
+    fd.write(json.dumps(all_repos))
