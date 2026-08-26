@@ -1,3 +1,4 @@
+import logger
 import os
 
 
@@ -105,6 +106,63 @@ def _write_section(all_repos, label: str, fd) -> None:
         </a>
     </td>
 </tr>
+""")
+
+    fd.write(f"""
+</tbody>
+</table>
+""")
+
+
+def _write_other_badges_section(all_repos, label: str, fd) -> None:
+    repos = [r for r in all_repos if r["stack"] == label]
+
+    fd.write(f"""
+<h2>{label} Stack</h2>
+<table class="matrix">
+<thead>
+  <tr>
+    <th>Repository</th>
+    <th>OpenSSF Scorecard</th>
+    <th>LF Insights</th>
+    <th>Corsa</th>
+  </tr>
+</thead>
+<tbody>
+""")
+
+    for r in repos:
+        fd.write(f"""
+    <tr>
+        <td data-label="Repository">
+            <a class="repo-link" href="repos/{r['name']}/index.html">{r['repo']}</a>
+        </td>
+        <td>
+""")
+        if "scorecard" in r:
+            fd.write(f"""
+            <a href="{r['scorecard']['url']}">
+                <img src="{r['scorecard']['file']}">
+            </a>
+""")
+        fd.write(f"""
+        </td>
+        <td>
+""")
+
+        if "lfinsights" in r:
+            fd.write(f"""
+            <a href="{r['lfinsights']['url']}">
+                <img src="{r['lfinsights']['file']}">
+            </a>
+""")
+
+        fd.write(f"""
+        </td>
+        <td>
+            <a href="https://corsa.center/dashboard/catalog/?category=all&repo={r['corsa']}"> entry </a>
+        </td>
+    </tr>
 """)
 
     fd.write(f"""

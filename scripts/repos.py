@@ -20,6 +20,9 @@ def load(file: str):
         if not "spack" in r:
             r["spack"] = project_name
 
+        if not "corsa" in r:
+            r["corsa"] = r["repo"]
+
     return repos
 
 

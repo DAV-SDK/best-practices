@@ -79,6 +79,8 @@ for r in all_repos:
     r["score"] = len([1 for c in r["checks"] if c.status])
 
     badges.generate_peso(r, site_directory)
+    badges.fetch_openssf(r, site_directory)
+    badges.fetch_lf_insights(r, site_directory)
 
 
 # Generate site

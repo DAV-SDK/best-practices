@@ -1,4 +1,7 @@
+import logger
 import os
+import requests
+from requests.adapters import Retry, HTTPAdapter
 
 
 def _get_color(score: float) -> str:
@@ -39,3 +42,69 @@ def generate_peso(repo, site_dir: str) -> None:
   </g>
 </svg>
         """)
+
+
+def fetch_lf_insights(repo, site_dir: str) -> None:
+    logger.info(f"Generating LF Insights badge for {repo['name']}")
+
+    s = requests.Session()
+
+    # Retry once before failing
+    retries = Retry(total=2, backoff_factor=1)
+    s.mount("http://", HTTPAdapter(max_retries=retries))
+
+    url = f"https://insights.linuxfoundation.org/api/badge/health-score?project={repo['name']}"
+
+    response = s.get(url)
+
+    if not response.ok:
+        if response.status_code != 404:
+            print(
+                f"Failed to fetch Linux Insights badge for {repo['name']}: {response.reason}"
+            )
+        return
+
+    filename = f"badges/{repo['name']}-lfx.svg"
+
+    repo["lfinsights"] = {
+        "file": filename,
+        "url": f"https://insights.linuxfoundation.org/project/{repo['name']}",
+    }
+
+    # The reponse is just text describing an SVG, so we can save it as-is
+    with open(f"{site_dir}/{filename}", "w") as fd:
+        fd.write(response.text)
+
+
+def fetch_openssf(repo, site_dir: str) -> None:
+    logger.info(f"Generating OpenSSF badge for {repo['name']}")
+
+    s = requests.Session()
+
+    # Retry once before failing
+    retries = Retry(total=2, backoff_factor=1)
+    s.mount("http://", HTTPAdapter(max_retries=retries))
+
+    url = f"https://api.scorecard.dev/projects/github.com/{repo['repo']}/badge"
+
+    response = s.get(url)
+
+    if not response.ok:
+        if response.status_code != 404:
+            print(f"Failed to fetch OSSF badge for {repo['name']}: {response.reason}")
+        return
+
+    # There isn't a badge available
+    if "invalid repo path" in response.text:
+        return
+
+    filename = f"badges/{repo['name']}-openssf-scorecard.svg"
+
+    repo["scorecard"] = {
+        "file": filename,
+        "url": f"https://scorecard.dev/viewer/?uri=github.com/{repo['repo']}",
+    }
+
+    # The reponse is just text describing an SVG, so we can save it as-is
+    with open(f"{site_dir}/{filename}", "w") as fd:
+        fd.write(response.text)

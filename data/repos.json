@@ -2,7 +2,8 @@
   {
     "repo": "LLNL/zfp",
     "branch": "staging",
-    "stack": "DAV"
+    "stack": "DAV",
+    "corsa": "llnl/zfp"
   },
   {
     "disabled": "true",
