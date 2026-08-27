@@ -22,15 +22,32 @@ parser.add_argument(
 )
 parser.add_argument("--verbose", action="store_true")
 parser.add_argument("--skip-clone", action="store_true")
+parser.add_argument(
+    "--repo", type=str, default="", help="Only check the repository REPO"
+)
 
 args = parser.parse_args()
+
 site_directory = args.site_directory
+filter_repos = args.repo != ""
+
 
 if args.verbose:
     logger.make_verbose()
 
 
 all_repos = repos.load("data/repos.json")
+
+if filter_repos:
+    for r in all_repos:
+        if r["repo"] == args.repo:
+            all_repos.clear()
+            all_repos.append(r)
+            break
+
+    if len(all_repos) != 1:
+        print(f"Unknown repository: {args.repo}")
+        exit(1)
 
 for r in all_repos:
     # Make sure all cdash configs are set up
@@ -82,6 +99,10 @@ for r in all_repos:
     badges.fetch_openssf(r, site_directory)
     badges.fetch_lf_insights(r, site_directory)
 
+
+if filter_repos:
+    print(json.dumps(all_repos, indent=2))
+    exit(0)
 
 # Generate site
 sitegen.make_root_page(all_repos, site_directory, generated_at)
