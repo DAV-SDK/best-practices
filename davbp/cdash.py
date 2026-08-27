@@ -1,4 +1,4 @@
-import logger
+import davbp.logger as logger
 import os
 import requests
 from requests.adapters import Retry, HTTPAdapter

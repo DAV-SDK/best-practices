@@ -1,4 +1,4 @@
-import logger
+import davbp.logger as logger
 import os
 
 
@@ -145,6 +145,8 @@ def _write_other_badges_section(all_repos, label: str, fd) -> None:
                 <img src="{r['scorecard']['file']}">
             </a>
 """)
+        else:
+            fd.write("-")
         fd.write(f"""
         </td>
         <td>
@@ -156,7 +158,8 @@ def _write_other_badges_section(all_repos, label: str, fd) -> None:
                 <img src="{r['lfinsights']['file']}">
             </a>
 """)
-
+        else:
+            fd.write("-")
         fd.write(f"""
         </td>
         <td>

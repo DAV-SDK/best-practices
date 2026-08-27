@@ -1,6 +1,6 @@
 import git
 import json
-import logger
+import davbp.logger as logger
 
 
 def load(file: str):

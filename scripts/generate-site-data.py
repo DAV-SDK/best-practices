@@ -1,18 +1,18 @@
 import argparse
-import backport
-import badges
-import cdash
+import davbp.backport as backport
+import davbp.badges as badges
+import davbp.cdash as cdash
 from collections import namedtuple
 import datetime
 import json
-import logger
+import davbp.logger as logger
 import os
-import ossf
-import repos
+import davbp.ossf as ossf
+import davbp.repos as repos
 import shutil
-import sitegen
-import spack
-import sync_script
+import davbp.sitegen as sitegen
+import davbp.spack as spack
+import davbp.sync_script as sync_script
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
