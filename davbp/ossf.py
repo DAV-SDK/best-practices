@@ -5,6 +5,9 @@ def check_scorecard_exists(git_workflow_dir: str) -> bool:
     """Check if the OpenSSF scorecard exists"""
 
     for root, _, files in os.walk(git_workflow_dir):
+        if not ".github/workflows" in root:
+            continue
+
         for f in files:
             if not f.endswith((".yaml", ".yml")):
                 continue
