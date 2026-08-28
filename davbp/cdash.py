@@ -40,6 +40,9 @@ def check_status_exists(git_workflow_dir: str) -> bool:
     """Check if the Kitware/cdash-status workflow is used"""
 
     for root, _, files in os.walk(git_workflow_dir):
+        if not ".github/workflows" in root:
+            continue
+
         for f in files:
             if not f.endswith((".yaml", ".yml")):
                 continue
