@@ -1,3 +1,4 @@
+import davbp.fsutils as fsutils
 import davbp.logger as logger
 import os
 import requests
@@ -39,17 +40,4 @@ def check_dashboard_exists(url: str) -> bool:
 def check_status_exists(git_workflow_dir: str) -> bool:
     """Check if the Kitware/cdash-status workflow is used"""
 
-    for root, _, files in os.walk(git_workflow_dir):
-        if not ".github/workflows" in root:
-            continue
-
-        for f in files:
-            if not f.endswith((".yaml", ".yml")):
-                continue
-
-            with open(os.path.join(root, f)) as fd:
-                for line in fd.readlines():
-                    if "Kitware/cdash-status" in line:
-                        return True
-
-    return False
+    return fsutils.grep_dir("Kitware/cdash-status", git_workflow_dir)
