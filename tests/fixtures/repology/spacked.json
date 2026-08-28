@@ -1,6 +1,0 @@
-[
-  {"repo": "github", "version": "2.1.0-rc1", "status": "devel"},
-  {"repo": "spack", "version": "develop", "status": "rolling"},
-  {"repo": "fedora", "version": "2.0.0", "status": "newest"},
-  {"repo": "spack", "version": "2.0.0", "status": "newest"}
-]

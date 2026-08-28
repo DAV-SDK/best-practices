@@ -21,6 +21,22 @@ def _get_newest_any(srcs) -> str:
     return None
 
 
+def _verify_sources(repo, srcs) -> bool:
+    newest = _get_newest_any(srcs)
+
+    if newest is None:
+        logger.warn(f"Failed to find newest version for {repo['spack']}")
+        return False
+
+    spack_newest = _get_spack_newest(srcs)
+
+    if spack_newest is None:
+        logger.warn(f"Failed to find newest spack version for {repo['spack']}")
+        return False
+
+    return newest == spack_newest
+
+
 def check_spack_status(repo) -> bool:
     """Check if the spack package contains the latest release"""
 
@@ -47,16 +63,4 @@ def check_spack_status(repo) -> bool:
 
     srcs = json.loads(response.text)
 
-    newest = _get_newest_any(srcs)
-
-    if newest is None:
-        logger.warn(f"Failed to find newest version for {repo['spack']}")
-        return False
-
-    spack_newest = _get_spack_newest(srcs)
-
-    if spack_newest is None:
-        logger.warn(f"Failed to find newest spack version for {repo['spack']}")
-        return False
-
-    return newest == spack_newest
+    return _verify_sources(repo, srcs)
