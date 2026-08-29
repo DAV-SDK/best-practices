@@ -19,7 +19,7 @@ jobs:
       - name: Formatting
         run: |
           source .env/bin/activate
-          black scripts/ davbp/ tests/
+          black --check scripts/ davbp/ tests/
 
       - name: Run tests
         run: |
