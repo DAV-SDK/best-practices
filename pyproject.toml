@@ -9,7 +9,8 @@ dependencies = [
 	"requests >= 2.20",
 	"gitpython >= 3.1.20",
 	"pytest >= 6.2",
-	"Jinja2 >= 3.0"
+	"Jinja2 >= 3.0",
+	"black >= 21.12"
 ]
 
 [tool.setuptools]
