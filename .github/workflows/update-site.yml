@@ -32,7 +32,11 @@ jobs:
       - name: Generate site data
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./scripts/generate-site-data.sh
+        run: |
+          python3 -m venv .env
+          source .env/bin/activate
+          pip install -e .
+          python3 scripts/generate-site-data.py --verbose --site-directory="./site"
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
