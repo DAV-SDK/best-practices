@@ -17,7 +17,11 @@ jobs:
           pip install -e .
 
       - name: Formatting
-        run: black scripts/ davbp/ tests/
+        run: |
+          source .env/bin/activate
+          black scripts/ davbp/ tests/
 
       - name: Run tests
-        run: pytest tests/
+        run: |
+          source .env/bin/activate
+          pytest tests/
