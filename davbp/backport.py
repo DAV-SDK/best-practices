@@ -7,5 +7,5 @@ def check_backport_exists(git_workflow_dir: str) -> bool:
     return fsutils.grep_dir(
         "korthout/backport-action",
         git_workflow_dir,
-        exclude_pattern=".github/workflows",
+        include_pattern=".github/workflows",
     )
