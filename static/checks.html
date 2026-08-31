@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checks explained - DAV SDK Best Practices</title>
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav><a href="index.html">&larr; all repositories</a></nav>
+</header>
+<main class="container">
+  <h1>What do these checks mean?</h1>
+
+  <h2><code>cdash-dashboard</code></h2>
+  <p>Whether the project has a dashboard on a CDash server (by default
+  <a href="https://open.cdash.org">open.cdash.org</a>; some projects run
+  their own, e.g. HDFGroup/hdf5's is my.cdash.org). A project dashboard
+  there aggregates CTest results (build, test, and coverage) submitted from
+  machines across the team, giving a shared view of build health beyond a
+  single CI run.</p>
+
+  <h2><code>cdash-status</code></h2>
+  <p>The <code>Kitware/cdash-status</code> GitHub Action. It reports CDash build
+  and test results back onto a pull request as a status check. Repos that use
+  it give reviewers CTest/CDash results directly in the PR, instead of
+  requiring a separate visit to a CDash dashboard.</p>
+
+  <h2><code>gh-gl-sync</code></h2>
+  <p>A GitLab CI/CD component that mirrors GitHub activity into a GitLab
+  pipeline. Repos that use it can run CI on GitLab-hosted runners (for example
+  for hardware or platforms not available on GitHub-hosted runners) while
+  staying in sync with GitHub pull requests and issues.</p>
+
+  <h2><code>backport-action</code></h2>
+  <p>The <code>korthout/backport-action</code> GitHub Action. It automatically
+  opens a backport pull request to a maintenance or release branch when a
+  merged PR is labeled for backporting. Repos that use it reduce the manual,
+  error-prone work of cherry-picking
+  fixes onto release branches.</p>
+
+  <h2><code>ossf-scorecard</code></h2>
+  <p>The <code>ossf/scorecard-action</code> GitHub Action, from the
+  <a href="https://securityscorecards.dev">OpenSSF Scorecard</a> project. It
+  runs a battery of supply-chain security checks (branch protection, pinned
+  dependencies, dangerous workflow patterns, and more) and publishes a
+  score, giving an ongoing view of the repo's security posture.</p>
+
+  <h2><code>spack-latest-release</code></h2>
+  <p>Whether the version currently packaged by <a href="https://spack.io">Spack</a>
+  matches the project's latest real release, using
+  <a href="https://repology.org">Repology</a> as the source of truth for
+  both (Repology's own version classification already excludes drafts,
+  pre-releases, and rc/alpha/beta-style versions). Repos that pass it can be
+  installed at their latest release through Spack right away, instead of
+  requiring a package update first.</p>
+</main>
+</body>
+</html>

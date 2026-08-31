@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOE PESO Best Practices</title>
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a href="checks.html">what do these checks mean?</a>
+    <a href="history.jsonl">history (JSON Lines)</a>
+  </nav>
+</header>
+<main class="container">
+  <h1>DoE PESO best-practices checklist</h1>
+  <p class="meta">Generated: {{ generated_at }}</p>
+
+
+{% macro main_table(label) %}
+
+  <h2>{{label}} Stack</h2>
+  <table class="matrix">
+  <thead>
+    <tr>
+      <th>Repository</th>
+      {% for c in all_repos[0]["checks"] %}
+        <th>{{ c.name }}</th>
+      {% endfor %}
+      <th>Score</th>
+    </tr>
+  </thead>
+  <tbody>
+  
+  {% for r in all_repos if r["stack"] == label  %}
+    <tr>
+      <td data-label="Repository">
+        <a class="repo-link" href="repos/{{ r['name'] }}/index.html">{{ r['repo'] }}</a>
+      </td>
+      {% for c in r["checks"] %}
+        <td data-label="Result">
+          {% if c.status %}
+            <span class="result-pass">yes</span>
+          {% else %}
+            <span class="result-fail">no</span>
+          {% endif %}
+        </td>
+      {% endfor %}
+      <td data-label="Score">
+        <a href="repos/{{ r['name'] -}}/index.html">
+            <img src="badges/{{ r['name'] -}}.svg">
+        </a>
+      </td>
+    </tr>
+  {% endfor %}
+
+  </tbody>
+  </table>
+{% endmacro %}
+
+{{ main_table("DAV") }}
+{{ main_table("Tools") }}
+
+<hr>
+
+{% macro other_badges_table(label) %}
+  <h2>{{label}} Stack</h2>
+  <table class="matrix">
+  <thead>
+    <tr>
+      <th>Repository</th>
+      <th>OpenSSF Scorecard</th>
+      <th>LF Insights</th>
+      <th>Corsa</th>
+    </tr>
+  </thead>
+  <tbody>
+  
+  {% for r in all_repos if r["stack"] == label  %}
+  
+    <tr>
+      <td data-label="Repository">
+        <a class="repo-link" href="repos/{{r['name']}}/index.html">{{r['repo']}}</a>
+      </td>
+      <td>
+        {% if "scorecard" in r %}
+          <a href="{{r['scorecard']['url']}}">
+            <img src="{{r['scorecard']['file']}}">
+          </a>
+        {% else %}
+        -
+        {% endif %}
+      </td>
+      <td>
+        {% if "lfinsights" in r %}
+          <a href="{{r['lfinsights']['url']}}">
+            <img src="{{r['lfinsights']['file']}}">
+          </a>
+        {% else %}
+        -
+        {% endif %}
+      </td>
+      <td>
+        <a href="https://corsa.center/dashboard/catalog/?category=all&repo={{r['corsa']}}"> entry </a>
+      </td>
+  {% endfor %}
+  
+  </tbody>
+  </table>
+{% endmacro %}
+
+{{ other_badges_table("DAV") }}
+{{ other_badges_table("Tools") }}
+
+</main>
+</body>
+</html>

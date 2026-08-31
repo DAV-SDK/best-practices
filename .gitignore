@@ -1,2 +1,5 @@
 /site/
 /tmp/
+*__pycache__*
+/git-clones/
+davbp.egg-info/
