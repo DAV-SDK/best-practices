@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{result.repo.repo_name}} - DAV SDK Best Practices</title>
 <link rel="icon" href="../../favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
 <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
 <header class="site-header">
   <nav>
-    <a href="../../index.html">&larr; all repositories</a>
-    <a href="../../checks.html">what do these checks mean?</a>
+    <ul>
+      <li><a href="../../index.html">&larr; all repositories</a></li>
+      <li><a href="../../checks.html">what do these checks mean?</a></li>
+    </ul>
   </nav>
 </header>
 <main class="container">
@@ -60,7 +63,7 @@
   <p class="meta">
     Spack package checked: <code>{{ result.repo.spack }}</code>
   </p>
-  <footer>Generated: {{ generated_at }}</footer>
+  <footer class="meta">Generated: {{ generated_at }}</footer>
 </main>
 </body>
 </html>
