@@ -44,6 +44,7 @@ cp "${repo_root}/static/style.css" "${site_dir}/style.css"
 generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 favicon_link='<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#128203;</text></svg>">'
+pico_link='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">'
 
 badge_color() {
   local score="$1"
@@ -152,13 +153,16 @@ for group_def in "${group_defs[@]}"; do
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${repo} - DAV SDK Best Practices</title>
 ${favicon_link}
+${pico_link}
 <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
 <header class="site-header">
   <nav>
-    <a href="../../index.html">&larr; all repositories</a>
-    <a href="../../checks.html">what do these checks mean?</a>
+    <ul>
+      <li><a href="../../index.html">&larr; all repositories</a></li>
+      <li><a href="../../checks.html">what do these checks mean?</a></li>
+    </ul>
   </nav>
 </header>
 <main class="container">
@@ -172,7 +176,7 @@ ${favicon_link}
   </table>
   <p class="meta">CDash project checked: <code>${cdash_project_checked}</code> on <code>${cdash_server_checked}</code></p>
   <p class="meta">Spack package checked: <code>${spack_package_checked}</code></p>
-  <footer>Generated: ${generated_at}</footer>
+  <footer class="meta">Generated: ${generated_at}</footer>
 </main>
 </body>
 </html>
@@ -227,13 +231,16 @@ cat >"${site_dir}/index.html" <<HTML
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAV SDK Best Practices</title>
 ${favicon_link}
+${pico_link}
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="site-header">
   <nav>
-    <a href="checks.html">what do these checks mean?</a>
-    <a href="history.jsonl">history (JSON Lines)</a>
+    <ul>
+      <li><a href="checks.html">what do these checks mean?</a></li>
+      <li><a href="history.jsonl">history (JSON Lines)</a></li>
+    </ul>
   </nav>
 </header>
 <main class="container">
@@ -253,11 +260,14 @@ cat >"${site_dir}/checks.html" <<HTML
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checks explained - DAV SDK Best Practices</title>
 ${favicon_link}
+${pico_link}
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="site-header">
-  <nav><a href="index.html">&larr; all repositories</a></nav>
+  <nav>
+    <ul><li><a href="index.html">&larr; all repositories</a></li></ul>
+  </nav>
 </header>
 <main class="container">
   <h1>What do these checks mean?</h1>
