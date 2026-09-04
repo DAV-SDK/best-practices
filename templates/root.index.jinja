@@ -26,7 +26,7 @@
   <thead>
     <tr>
       <th>Repository</th>
-      {% for c in all_repos[0]["checks"] %}
+      {% for c in all_repos[0].checks %}
         <th>{{ c.name }}</th>
       {% endfor %}
       <th>Score</th>
@@ -34,12 +34,12 @@
   </thead>
   <tbody>
   
-  {% for r in all_repos if r["stack"] == label  %}
+  {% for r in all_repos if r.stack == label  %}
     <tr>
       <td data-label="Repository">
-        <a class="repo-link" href="repos/{{ r['name'] }}/index.html">{{ r['repo'] }}</a>
+        <a class="repo-link" href="repos/{{r.project_name}}/index.html">{{r.repo_name}}</a>
       </td>
-      {% for c in r["checks"] %}
+      {% for c in r.checks %}
         <td data-label="Result">
           {% if c.status %}
             <span class="result-pass">yes</span>
@@ -49,8 +49,8 @@
         </td>
       {% endfor %}
       <td data-label="Score">
-        <a href="repos/{{ r['name'] -}}/index.html">
-            <img src="badges/{{ r['name'] -}}.svg">
+        <a href="repos/{{r.project_name}}/index.html">
+            <img src="badges/{{r.project_name}}.svg">
         </a>
       </td>
     </tr>
@@ -78,32 +78,32 @@
   </thead>
   <tbody>
   
-  {% for r in all_repos if r["stack"] == label  %}
+  {% for r in all_repos if r.stack == label  %}
   
     <tr>
       <td data-label="Repository">
-        <a class="repo-link" href="repos/{{r['name']}}/index.html">{{r['repo']}}</a>
+        <a class="repo-link" href="repos/{{r.project_name}}/index.html">{{r.repo_name}}</a>
       </td>
       <td>
-        {% if "scorecard" in r %}
-          <a href="{{r['scorecard']['url']}}">
-            <img src="{{r['scorecard']['file']}}">
+        {% if r.ossf_scorecard is defined %}
+          <a href="{{r.ossf_scorecard['url']}}">
+            <img src="{{r.ossf_scorecard['file']}}">
           </a>
         {% else %}
         -
         {% endif %}
       </td>
       <td>
-        {% if "lfinsights" in r %}
-          <a href="{{r['lfinsights']['url']}}">
-            <img src="{{r['lfinsights']['file']}}">
+        {% if r.lfinsights is defined %}
+          <a href="{{r.lfinsights['url']}}">
+            <img src="{{r.lfinsights['file']}}">
           </a>
         {% else %}
         -
         {% endif %}
       </td>
       <td>
-        <a href="https://corsa.center/dashboard/catalog/?category=all&repo={{r['corsa']}}"> entry </a>
+        <a href="https://corsa.center/dashboard/catalog/?category=all&repo={{r.corsa}}"> entry </a>
       </td>
   {% endfor %}
   

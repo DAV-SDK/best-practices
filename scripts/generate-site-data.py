@@ -36,11 +36,11 @@ if args.verbose:
     logger.make_verbose()
 
 
-all_repos = repos.load("data/repos.json")
+all_repos = repos.load("data/repos.json", args.skip_clone)
 
 if filter_repos:
     for r in all_repos:
-        if r["repo"] == args.repo:
+        if r.repo_name == args.repo:
             all_repos.clear()
             all_repos.append(r)
             break
@@ -49,12 +49,6 @@ if filter_repos:
         print(f"Unknown repository: {args.repo}")
         exit(1)
 
-for r in all_repos:
-    # Make sure all cdash configs are set up
-    cdash.init_urls(r)
-
-    # git-clone the repo
-    repos.clone(r, args.skip_clone)
 
 # Create site layout
 if not os.path.exists(f"{site_directory}/badges"):
@@ -71,21 +65,21 @@ generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
 for r in all_repos:
 
     # fmt: off
-    r["checks"] = [
+    r.checks = [
         # Is there a CDash dashboard?
-        Check("cdash dashboard", cdash.check_dashboard_exists(r["cdash_url"])),
+        Check("cdash dashboard", cdash.check_dashboard_exists(r)),
 
         # Does it use the Kitware/cdash-status action?
-        Check("cdash status", cdash.check_status_exists(r["clone_dir"])),
+        Check("cdash status", cdash.check_status_exists(r)),
 
         # Check if the gh-gl-sync action is used
-        Check("gh-gl sync", sync_script.check_sync_exists(r["clone_dir"])),
+        Check("gh-gl sync", sync_script.check_sync_exists(r)),
 
         # Check if the korthout/backport-action action is used
-        Check("backport action", backport.check_backport_exists(r["clone_dir"])),
+        Check("backport action", backport.check_backport_exists(r)),
 
         # Check if the OpenSSF scorecard exists
-        Check("ossf scorecard", ossf.check_scorecard_exists(r["clone_dir"])),
+        Check("ossf scorecard", ossf.check_scorecard_exists(r)),
 
         # Check if spack package has latest version
         Check("spack latest release", spack.check_spack_status(r))
@@ -93,12 +87,13 @@ for r in all_repos:
     # fmt: on
 
     # Score stats
-    r["score"] = len([1 for c in r["checks"] if c.status])
+    r.score = len([1 for c in r.checks if c.status])
 
     badges.generate_peso(r, site_directory)
     badges.fetch_openssf(r, site_directory)
     badges.fetch_lf_insights(r, site_directory)
-
+    
+    print()
 
 if filter_repos:
     print(json.dumps(all_repos, indent=2))
@@ -115,5 +110,5 @@ shutil.copyfile("static/checks.html", os.path.join(site_directory, "checks.html"
 
 
 # Export results to the history
-with open(os.path.join(site_directory, "history.jsonl"), "a") as fd:
-    fd.write(json.dumps(all_repos))
+# with open(os.path.join(site_directory, "history.jsonl"), "a") as fd:
+#     fd.write(json.dumps(all_repos))

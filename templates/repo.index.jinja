@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ repo['repo'] }} - DAV SDK Best Practices</title>
+<title>{{ repo.repo_name }} - DAV SDK Best Practices</title>
 <link rel="icon" href="../../favicon.svg">
 <link rel="stylesheet" href="../../style.css">
 </head>
@@ -15,17 +15,17 @@
   </nav>
 </header>
 <main class="container">
-  <h1>{{ repo['repo'] }}</h1>
+  <h1>{{ repo.repo_name }}</h1>
   <p>
     <a href="index.html">
-      <img src="../../badges/{{ repo['name'] }}.svg">
+      <img src="../../badges/{{repo.project_name}}.svg">
     </a>
   </p>
   <p>
-    <a href="https://{{ repo['git_provider'] }}/{{ repo['repo'] }}">
-      {{ repo['git_provider'] }}/{{ repo['repo'] }}
+    <a href="https://{{repo.git_provider}}/{{repo.repo_name}}">
+      {{repo.git_provider}}/{{repo.repo_name}}
     </a>
-    &middot; branch <code>{{ repo['branch'] }}</code>
+    &middot; branch <code>{{repo.git_branch}}</code>
   </p>
   <table>
   <thead>
@@ -55,10 +55,10 @@
   </table>
 
   <p class="meta">CDash project checked:
-    <code>{{ repo['cdash'] }}</code> on <code>{{ repo['cdash_server'] }}</code>
+    <code>{{ repo.cdash }}</code> on <code>{{ repo.cdash_server }}</code>
   </p>
   <p class="meta">
-    Spack package checked: <code>{{ repo['spack'] }}</code>
+    Spack package checked: <code>{{ repo.spack }}</code>
   </p>
   <footer>Generated: {{ generated_at }}</footer>
 </main>

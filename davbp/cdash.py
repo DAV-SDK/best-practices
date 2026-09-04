@@ -1,23 +1,23 @@
-import davbp.fsutils as fsutils
-import davbp.logger as logger
-import os
+"""
+DAV/Tools internal dashboard check for CDash dashboard usage
+"""
+
 import requests
 from requests.adapters import Retry, HTTPAdapter
+from davbp import fsutils
+from davbp import logger
+from davbp import Repository as Repo
 
 
-def init_urls(repo) -> None:
-    # Give a default for the CDash instance
-    if "cdash" not in repo:
-        repo["cdash"] = repo["name"]
+def check_dashboard_exists(repo: Repo) -> bool:
+    """
+    Check if a public CDash dashboard exists
 
-    if "cdash_server" not in repo:
-        repo["cdash_server"] = "https://open.cdash.org"
+    Args:
+        repo (Repo): The source repository
+    """
 
-    repo["cdash_url"] = f"{repo['cdash_server']}/index.php?project={repo['cdash']}"
-
-
-def check_dashboard_exists(url: str) -> bool:
-    """Check if the dashboard exists"""
+    url = repo.cdash_url
 
     logger.info(f"Checking dashboard for {url}")
 
@@ -37,7 +37,12 @@ def check_dashboard_exists(url: str) -> bool:
     return True
 
 
-def check_status_exists(git_workflow_dir: str) -> bool:
-    """Check if the Kitware/cdash-status workflow is used"""
+def check_status_exists(repo: Repo) -> bool:
+    """
+    Check if the Kitware/cdash-status workflow is used
 
-    return fsutils.grep_dir("Kitware/cdash-status", git_workflow_dir)
+    Args:
+        repo (Repo): The source repository
+    """
+
+    return fsutils.grep_dir("Kitware/cdash-status", repo.clone_dir)
