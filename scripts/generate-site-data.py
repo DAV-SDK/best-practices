@@ -79,7 +79,7 @@ for r in all_repos:
         Check("backport action", backport.check_backport_exists(r)),
 
         # Check if the OpenSSF scorecard exists
-        Check("ossf scorecard", ossf.check_scorecard_exists(r)),
+        Check("ossf scorecard action", ossf.check_scorecard_exists(r)),
 
         # Check if spack package has latest version
         Check("spack latest release", spack.check_spack_status(r))
