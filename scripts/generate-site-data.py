@@ -1,18 +1,12 @@
 import argparse
-import davbp.backport as backport
-import davbp.badges as badges
-import davbp.cdash as cdash
-from collections import namedtuple
 import datetime
 import json
-import davbp.logger as logger
 import os
-import davbp.ossf as ossf
-import davbp.repos as repos
 import shutil
+import davbp.check as check
+import davbp.logger as logger
+import davbp.repos as repos
 import davbp.sitegen as sitegen
-import davbp.spack as spack
-import davbp.sync_script as sync_script
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -61,30 +55,12 @@ generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
     "%Y-%m-%dT%H:%M:%SZ"
 )
 
+
 # Run the checks
 for r in all_repos:
-
-    # fmt: off
-    r.checks = [
-        # Is there a CDash dashboard?
-        Check("cdash dashboard", cdash.check_dashboard_exists(r)),
-
-        # Does it use the Kitware/cdash-status action?
-        Check("cdash status", cdash.check_status_exists(r)),
-
-        # Check if the gh-gl-sync action is used
-        Check("gh-gl sync", sync_script.check_sync_exists(r)),
-
-        # Check if the korthout/backport-action action is used
-        Check("backport action", backport.check_backport_exists(r)),
-
-        # Check if the OpenSSF scorecard exists
-        Check("ossf scorecard action", ossf.check_scorecard_exists(r)),
-
-        # Check if spack package has latest version
-        Check("spack latest release", spack.check_spack_status(r))
-    ]
-    # fmt: on
+    
+#    r.checks = Check.run_checks(r)
+    r.generate_badges(site_directory)
 
     # Score stats
     r.score = len([1 for c in r.checks if c.status])
@@ -92,7 +68,6 @@ for r in all_repos:
     badges.generate_peso(r, site_directory)
     badges.fetch_openssf(r, site_directory)
     badges.fetch_lf_insights(r, site_directory)
-    
     print()
 
 if filter_repos:
