@@ -49,19 +49,24 @@ generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
 )
 
 
-# Run the checks
+all_results = []
+
 for r in all_repos:
-    
-#    r.checks = Check.run_checks(r)
-    r.generate_badges(site_directory)
+    check_results = Check.run_checks(r)
+    results.append(
+        {
+            "repo": r,
+            "results": check_results,
+            "score": len([1 for c in checks if c.result]),
+            "badges": {
+                "peso": badges.generate_peso(r, site_directory),
+                "ossf": badges.fetch_openssf(r, site_directory),
+                "lfinsights": badges.fetch_lf_insights(r, site_directory),
+            },
+        }
+    )
+    logger.info("\n")
 
-    # Score stats
-    r.score = len([1 for c in r.checks if c.status])
-
-    badges.generate_peso(r, site_directory)
-    badges.fetch_openssf(r, site_directory)
-    badges.fetch_lf_insights(r, site_directory)
-    print()
 
 if filter_repos:
     print(json.dumps(all_repos, indent=2))
