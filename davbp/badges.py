@@ -16,10 +16,16 @@ Three badges are provided:
         https://openssf.org/projects/scorecard/
 """
 
+import os
 import requests
 from requests.adapters import Retry, HTTPAdapter
 from davbp import logger
 from davbp.Repository import Repository as Repo
+
+
+def _init_dir(site_directory: str) -> None:
+    if not os.path.exists(f"{site_directory}/badges"):
+        os.makedirs(f"{site_directory}/badges")
 
 
 def _get_color(score: float) -> str:
@@ -41,6 +47,8 @@ def generate_peso(repo: Repo, site_dir: str) -> None:
         site_dir (str): The location to save the file
     """
     logger.info(f"Generating PESO badge for {repo.repo_name}")
+
+    _init_dir(site_dir)
 
     nchecks = len(repo.checks)
     score = repo.score
@@ -81,6 +89,8 @@ def fetch_lf_insights(repo: Repo, site_dir: str) -> None:
     """
     logger.info(f"Generating LF Insights badge for {repo.repo_name}")
 
+    _init_dir(site_dir)
+
     s = requests.Session()
 
     # Retry once before failing
@@ -118,6 +128,8 @@ def fetch_openssf(repo: Repo, site_dir: str) -> None:
         site_dir (str): The location to save the file
     """
     logger.info(f"Generating OpenSSF badge for {repo.repo_name}")
+
+    _init_dir(site_dir)
 
     s = requests.Session()
 

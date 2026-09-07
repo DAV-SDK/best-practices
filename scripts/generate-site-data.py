@@ -44,13 +44,6 @@ if filter_repos:
         exit(1)
 
 
-# Create site layout
-if not os.path.exists(f"{site_directory}/badges"):
-    os.makedirs(f"{site_directory}/badges")
-
-
-Check = namedtuple("Check", "name status")
-
 generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
     "%Y-%m-%dT%H:%M:%SZ"
 )
