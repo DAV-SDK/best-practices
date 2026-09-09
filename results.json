@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T17:33:52Z",
+  "generated_at": "2026-09-09T20:26:11Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -97,7 +97,7 @@
         {
           "repo": "HDFGroup/hdf5",
           "branch": "develop",
-          "cdash_dashboard": true,
+          "cdash_dashboard": false,
           "cdash_status": false,
           "gh_gl_sync": false,
           "backport_action": false,
@@ -106,7 +106,7 @@
           "cdash_project": "HDF5",
           "cdash_server": "https://my.cdash.org",
           "spack_package": "hdf5",
-          "total_score": 3,
+          "total_score": 2,
           "total_checks": 6
         }
       ]
