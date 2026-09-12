@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import shutil
+import davbp.badges as badges
 import davbp.check as check
 import davbp.logger as logger
 import davbp.repos as repos
@@ -49,32 +50,33 @@ generated_at = datetime.datetime.now(datetime.timezone.utc).strftime(
 )
 
 
-all_results = []
+all_results: [check.RunResult] = []
 
 for r in all_repos:
-    check_results = Check.run_checks(r)
-    results.append(
-        {
-            "repo": r,
-            "results": check_results,
-            "score": len([1 for c in checks if c.result]),
-            "badges": {
-                "peso": badges.generate_peso(r, site_directory),
+    check_results = check.run_checks(r)
+    score = len([1 for c in check_results if c.result])
+    all_results.append(
+        check.RunResult(
+            repo = r,
+            results = check_results,
+            score = score,
+            badges = {
+                "peso": badges.generate_peso(r, score, len(check_results), site_directory),
                 "ossf": badges.fetch_openssf(r, site_directory),
                 "lfinsights": badges.fetch_lf_insights(r, site_directory),
             },
-        }
+        )
     )
-    logger.info("\n")
+    print("\n")
 
 
 if filter_repos:
-    print(json.dumps(all_repos, indent=2))
+    print(json.dumps(all_results, indent=2, default=lambda r: r.to_dict()))
     exit(0)
 
 # Generate site
-sitegen.make_root_page(all_repos, site_directory, generated_at)
-sitegen.make_repo_details_pages(all_repos, site_directory, generated_at)
+sitegen.make_root_page(all_results, site_directory, generated_at)
+sitegen.make_repo_details_pages(all_results, site_directory, generated_at)
 
 # Copy generated files into the site directory
 shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))

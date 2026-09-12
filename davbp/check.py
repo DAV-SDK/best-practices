@@ -2,7 +2,9 @@
 Utilities for handling the individual checks for the DAV/Tools dashboard
 """
 
+from dataclasses import dataclass
 import typing
+from davbp.badges import Badge
 from davbp.Repository import Repository as Repo
 
 
@@ -37,6 +39,30 @@ class CheckResult:
     def __init__(self, name: str, result: bool):
         self.name = name
         self.result = result
+
+
+@dataclass
+class RunResult:
+    repo: Repo
+    results: [CheckResult]
+    score: int
+    badges: dict[str, Badge]
+
+    def to_dict(self):
+        res = {
+            "repo": self.repo.repo_name,
+            "branch": self.repo.git_branch,
+            "cdash_project": self.repo.cdash,
+            "cdash_server": self.repo.cdash_server,
+            "spack_package": self.repo.spack,
+            "total_score": self.score,
+            "total_checks": len(self.results),
+            "stack": self.repo.stack,
+        }
+        for c in self.results:
+            res[c.name] = c.result
+
+        return res
 
 
 _all_checks: [Check] = []
