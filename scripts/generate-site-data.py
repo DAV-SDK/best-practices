@@ -85,5 +85,4 @@ shutil.copyfile("static/checks.html", os.path.join(site_directory, "checks.html"
 
 
 # Export results to the history
-# with open(os.path.join(site_directory, "history.jsonl"), "a") as fd:
-#     fd.write(json.dumps(all_repos))
+repos.dump(all_results, site_directory, generated_at)
