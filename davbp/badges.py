@@ -16,11 +16,25 @@ Three badges are provided:
         https://openssf.org/projects/scorecard/
 """
 
+from dataclasses import dataclass
 import os
 import requests
 from requests.adapters import Retry, HTTPAdapter
 from davbp import logger
 from davbp.Repository import Repository as Repo
+
+
+@dataclass
+class Badge:
+    """
+    A badge representing a check's score
+
+    url (str): The site hosting the details of the badge
+    file (str): The location of the stored badge SVG file
+    """
+
+    url: str = None
+    file: str = None
 
 
 def _init_dir(site_directory: str) -> None:
@@ -38,35 +52,37 @@ def _get_color(score: float) -> str:
     return "#44CC11"
 
 
-def generate_peso(repo: Repo, site_dir: str) -> None:
+def generate_peso(repo: Repo, score: int, num_checks: int, site_dir: str) -> Badge:
     """
     Generate an SVG file for the PESO badge
 
     Args:
         repo (Repo): The source repository
+        score (int): The number of passed checks
+        num_checks (int): The total number of checks
         site_dir (str): The location to save the file
+
+    Returns
+        The PESO badge
     """
+
     logger.info(f"Generating PESO badge for {repo.repo_name}")
 
     _init_dir(site_dir)
-
-    nchecks = len(repo.checks)
-    score = repo.score
 
     label = "PESO Scorecard"
     label_w = len(label) * 7 + 10
     label_pos_x = label_w // 2
 
-    message = f"{score}/{nchecks}"
+    message = f"{score}/{num_checks}"
     message_w = len(message) * 7 + 10
     message_pos_x = label_w + (message_w // 2)
 
-    color = _get_color(score / nchecks)
+    color = _get_color(score / num_checks)
     total_w = label_w + message_w
 
-    with open(
-        f"{site_dir}/badges/{repo.project_name}.svg", mode="w", encoding="utf-8"
-    ) as fd:
+    filename = f"{site_dir}/badges/{repo.project_name}.svg"
+    with open(filename, mode="w", encoding="utf-8") as fd:
         fd.write(f"""\
 <svg xmlns="http://www.w3.org/2000/svg" width="{total_w}" height="20" role="img" aria-label="{label}: {message}">
   <rect width="{total_w}" height="20" fill="#555"/>
@@ -78,8 +94,10 @@ def generate_peso(repo: Repo, site_dir: str) -> None:
 </svg>
         """)
 
+    return Badge(file=filename)
 
-def fetch_lf_insights(repo: Repo, site_dir: str) -> None:
+
+def fetch_lf_insights(repo: Repo, site_dir: str) -> Badge:
     """
     Download the Linux Foundation Insights badge
 
@@ -87,6 +105,7 @@ def fetch_lf_insights(repo: Repo, site_dir: str) -> None:
         repo (Repo): The source repository
         site_dir (str): The location to save the file
     """
+
     logger.info(f"Generating LF Insights badge for {repo.repo_name}")
 
     _init_dir(site_dir)
@@ -105,21 +124,19 @@ def fetch_lf_insights(repo: Repo, site_dir: str) -> None:
         logger.warn(
             f"Failed to fetch Linux Insights badge for {repo.repo_name}: {response.reason}"
         )
-        return
+        return Badge()
 
     filename = f"badges/{repo.project_name}-lfx.svg"
-
-    repo.lfinsights = {
-        "file": filename,
-        "url": f"https://insights.linuxfoundation.org/project/{repo.project_name}",
-    }
 
     # The reponse is just text describing an SVG, so we can save it as-is
     with open(f"{site_dir}/{filename}", mode="w", encoding="utf-8") as fd:
         fd.write(response.text)
 
+    url = f"https://insights.linuxfoundation.org/project/{repo.project_name}"
+    return Badge(url, filename)
 
-def fetch_openssf(repo: Repo, site_dir: str) -> None:
+
+def fetch_openssf(repo: Repo, site_dir: str) -> Badge:
     """
     Download the Open Source Security Foundation badge
 
@@ -127,6 +144,7 @@ def fetch_openssf(repo: Repo, site_dir: str) -> None:
         repo (Repo): The source repository
         site_dir (str): The location to save the file
     """
+
     logger.info(f"Generating OpenSSF badge for {repo.repo_name}")
 
     _init_dir(site_dir)
@@ -140,26 +158,23 @@ def fetch_openssf(repo: Repo, site_dir: str) -> None:
     url = (
         f"https://api.scorecard.dev/projects/{repo.git_provider}/{repo.repo_name}/badge"
     )
-
     response = s.get(url)
 
     if not response.ok:
         logger.warn(
             f"Failed to fetch OSSF badge for {repo.repo_name}: {response.reason}"
         )
-        return
+        return Badge()
 
     # There isn't a badge available
     if "invalid repo path" in response.text:
-        return
+        return Badge()
 
     filename = f"badges/{repo.project_name}-openssf-scorecard.svg"
-
-    repo.ossf_scorecard = {
-        "file": filename,
-        "url": f"https://scorecard.dev/viewer/?uri={repo.git_provider}/{repo.repo_name}",
-    }
 
     # The reponse is just text describing an SVG, so we can save it as-is
     with open(f"{site_dir}/{filename}", mode="w", encoding="utf-8") as fd:
         fd.write(response.text)
+
+    url = f"https://scorecard.dev/viewer/?uri={repo.git_provider}/{repo.repo_name}"
+    return Badge(url, filename)
