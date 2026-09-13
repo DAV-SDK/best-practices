@@ -40,7 +40,7 @@ class Repository:
 
         self.git_provider: str = raw_input.get("git_provider", "github.com")
 
-        self.clone_dir = f"git-clones/{project_name}"
+        self.clone_dir = raw_input.get("clone_dir", f"git-clones/{project_name}")
 
         if not skip_clone:
             self._clone(raw_input.get("branch"))
