@@ -22,14 +22,17 @@ CI best practices and publishes the results as a static site.
 
 ### Adding a check
 
-Create a new module in `scripts/`, add it to the list of checks in
-`generate-site-data.py`, and then add a description for it in
-`static/checks.html`.
+1. Create a new module in `davbp/checks/`
+2. Implement the `check.Check` protocol
+3. Add it to the import list in `davbp/__init__.py`
+4. If possible, add a test for it in `tests/`
+
+The `Check.description` property can contain html markup.
 
 ## Requirements
 
 - `git`
-- `python 3.10` or newer
+- `python 3.11` or newer
 
 See `pyproject.toml` for additional python packages used.
 
