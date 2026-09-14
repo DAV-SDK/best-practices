@@ -57,11 +57,13 @@ for r in all_repos:
     score = len([1 for c in check_results if c.result])
     all_results.append(
         check.RunResult(
-            repo = r,
-            results = check_results,
-            score = score,
-            badges = {
-                "peso": badges.generate_peso(r, score, len(check_results), site_directory),
+            repo=r,
+            results=check_results,
+            score=score,
+            badges={
+                "peso": badges.generate_peso(
+                    r, score, len(check_results), site_directory
+                ),
                 "ossf": badges.fetch_openssf(r, site_directory),
                 "lfinsights": badges.fetch_lf_insights(r, site_directory),
             },
