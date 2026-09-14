@@ -41,5 +41,16 @@ class CDashDashboardExists(check.Check):
 
         return True
 
+    @property
+    def description(self) -> str:
+        return """
+            Whether the project has a dashboard on a CDash server (by default
+            <a href="https://open.cdash.org">open.cdash.org</a>; some projects run
+            their own, e.g. HDFGroup/hdf5's is my.cdash.org). A project dashboard
+            there aggregates CTest results (build, test, and coverage) submitted from
+            machines across the team, giving a shared view of build health beyond a
+            single CI run.
+        """
+
 
 check.register_check(CDashDashboardExists())

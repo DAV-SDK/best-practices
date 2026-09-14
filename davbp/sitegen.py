@@ -5,7 +5,7 @@ Facilities to render the DAV/Tools dashboard using Jinja2 templates
 import os
 from jinja2 import Environment, FileSystemLoader
 from davbp import logger
-from davbp.check import RunResult
+from davbp.check import RunResult, _all_checks
 
 
 def make_repo_details_pages(
@@ -53,3 +53,15 @@ def make_root_page(results: [RunResult], output_dir: str, generated_at: str) -> 
         )
         template = env.get_template("root.index.jinja")
         fd.write(template.render(all_results=results, generated_at=generated_at))
+
+
+def make_check_description_page(output_dir: str) -> None:
+    """Create page for for check descriptions"""
+
+    logger.info("Writing checks.html")
+
+    env = Environment(loader=FileSystemLoader("templates"))
+
+    with open(f"{output_dir}/checks.html", mode="w", encoding="utf-8") as fd:
+        template = env.get_template("checks.jinja")
+        fd.write(template.render(checks=_all_checks))

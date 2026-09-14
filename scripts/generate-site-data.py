@@ -79,11 +79,11 @@ if filter_repos:
 # Generate site
 sitegen.make_root_page(all_results, site_directory, generated_at)
 sitegen.make_repo_details_pages(all_results, site_directory, generated_at)
+sitegen.make_check_description_page(site_directory)
 
 # Copy generated files into the site directory
 shutil.copyfile("static/favicon.svg", os.path.join(site_directory, "favicon.svg"))
 shutil.copyfile("static/style.css", os.path.join(site_directory, "style.css"))
-shutil.copyfile("static/checks.html", os.path.join(site_directory, "checks.html"))
 
 
 # Export results to the history

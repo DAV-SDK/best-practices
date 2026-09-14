@@ -30,6 +30,10 @@ class Check(typing.Protocol):
             Returns True if the check passed. False, otherwise.
         """
 
+    @property
+    def description(self) -> str:
+        """A description of the check"""
+
 
 class CheckResult:
     """

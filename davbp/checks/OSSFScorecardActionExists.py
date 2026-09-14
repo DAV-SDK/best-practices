@@ -28,5 +28,15 @@ class OSSFScorecardActionExists(check.Check):
             "ossf/scorecard-action", repo.clone_dir, include_pattern=".github/workflows"
         )
 
+    @property
+    def description(self) -> str:
+        return """
+            The <code>ossf/scorecard-action</code> GitHub Action, from the
+            <a href="https://securityscorecards.dev">OpenSSF Scorecard</a> project. It
+            runs a battery of supply-chain security checks (branch protection, pinned
+            dependencies, dangerous workflow patterns, and more) and publishes a
+            score, giving an ongoing view of the repo's security posture.
+        """
+
 
 check.register_check(OSSFScorecardActionExists())

@@ -29,5 +29,14 @@ class SyncActionExists(check.Check):
 
         return fsutils.grep_dir("gh-gl-sync", repo.clone_dir)
 
+    @property
+    def description(self) -> str:
+        return """
+            A GitLab CI/CD component that mirrors GitHub activity into a GitLab
+            pipeline. Repos that use it can run CI on GitLab-hosted runners (for example
+            for hardware or platforms not available on GitHub-hosted runners) while
+            staying in sync with GitHub pull requests and issues.
+        """
+
 
 check.register_check(SyncActionExists())

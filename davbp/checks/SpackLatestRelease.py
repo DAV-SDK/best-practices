@@ -82,5 +82,17 @@ class SpackLatestRelease(check.Check):
 
         return newest == spack_newest
 
+    @property
+    def description(self) -> str:
+        return """
+            Whether the version currently packaged by <a href="https://spack.io">Spack</a>
+            matches the project's latest real release, using
+            <a href="https://repology.org">Repology</a> as the source of truth for
+            both (Repology's own version classification already excludes drafts,
+            pre-releases, and rc/alpha/beta-style versions). Repos that pass it can be
+            installed at their latest release through Spack right away, instead of
+            requiring a package update first.
+        """
+
 
 check.register_check(SpackLatestRelease())

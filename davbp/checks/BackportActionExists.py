@@ -26,5 +26,15 @@ class BackportActionExists(check.Check):
             include_pattern=".github/workflows",
         )
 
+    @property
+    def description(self) -> str:
+        return """
+            The <code>korthout/backport-action</code> GitHub Action. It automatically
+            opens a backport pull request to a maintenance or release branch when a
+            merged PR is labeled for backporting. Repos that use it reduce the manual,
+            error-prone work of cherry-picking
+            fixes onto release branches.
+        """
+
 
 check.register_check(BackportActionExists())
