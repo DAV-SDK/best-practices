@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{result.repo.repo_name}} - DAV SDK Best Practices</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav>
+    <a href="../../index.html">&larr; all repositories</a>
+    <a href="../../checks.html">what do these checks mean?</a>
+  </nav>
+</header>
+<main class="container">
+  <h1>{{ result.repo.repo_name }}</h1>
+  <p>
+    <a href="index.html">
+      <img src="../../badges/{{result.repo.project_name}}.svg">
+    </a>
+  </p>
+  <p>
+    <a href="https://{{result.repo.git_provider}}/{{result.repo.repo_name}}">
+      {{result.repo.git_provider}}/{{result.repo.repo_name}}
+    </a>
+    &middot; branch <code>{{ result.repo.git_branch }}</code>
+  </p>
+  <table>
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for r in result.results %}
+    <tr>
+      <td data-label="Check">
+        <code>{{ r.name }}</code>
+      </td>
+      <td data-label="Result">
+        {% if r.result %}
+          <span class="result-pass">yes</span>
+        {% else %}
+          <span class="result-fail">no</span>
+        {% endif %}
+      </td>
+    </tr>   
+  {% endfor %}
+
+  </tbody>
+  </table>
+
+  <p class="meta">CDash project checked:
+    <code>{{ result.repo.cdash }}</code> on <code>{{ result.repo.cdash_server }}</code>
+  </p>
+  <p class="meta">
+    Spack package checked: <code>{{ result.repo.spack }}</code>
+  </p>
+  <footer>Generated: {{ generated_at }}</footer>
+</main>
+</body>
+</html>

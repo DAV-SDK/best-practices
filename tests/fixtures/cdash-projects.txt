@@ -1,3 +1,0 @@
-open.cdash.org full
-open.cdash.org override-project
-my.cdash.org hdf5-style-project

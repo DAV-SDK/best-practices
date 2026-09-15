@@ -1,4 +1,0 @@
-[
-  {"repo": "fedora", "version": "3.0.0", "status": "newest"},
-  {"repo": "spack", "version": "2.0.0", "status": "outdated"}
-]
