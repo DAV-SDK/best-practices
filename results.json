@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T05:44:48Z",
+  "generated_at": "2026-09-17T10:59:27Z",
   "groups": [
     {
       "label": "DAV Stack",
@@ -37,7 +37,7 @@
         {
           "repo": "Viskores/viskores",
           "branch": "main",
-          "cdash_dashboard": false,
+          "cdash_dashboard": true,
           "cdash_status": true,
           "gh_gl_sync": true,
           "backport_action": true,
@@ -46,7 +46,7 @@
           "cdash_project": "Viskores",
           "cdash_server": "https://open.cdash.org",
           "spack_package": "viskores",
-          "total_score": 4,
+          "total_score": 5,
           "total_checks": 6
         },
         {
