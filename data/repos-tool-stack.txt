@@ -1,5 +1,0 @@
-# See data/repos-dav-stack.txt for the line format.
-icl-utk-edu/papi
-UO-OACISS/tau2
-darshan-hpc/darshan spack=python:darshan
-dyninst/dyninst
