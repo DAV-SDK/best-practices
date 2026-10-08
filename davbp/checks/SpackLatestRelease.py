@@ -95,6 +95,4 @@ class SpackLatestRelease(check.Check):
         """
 
 
-# repology.org is offline for the foreseeable future.
-# https://github.com/repology/repology-rs/issues/560
-# check.register_check(SpackLatestRelease())
+check.register_check(SpackLatestRelease())
