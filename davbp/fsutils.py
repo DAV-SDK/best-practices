@@ -17,7 +17,7 @@ def grep_dir(value: str, directory: str, include_pattern: str | None = None) -> 
     Return:
         True if a file containing `value` was found. False, otherwise.
     """
-    for root, _, files in os.walk(directory):
+    for root, _, files in os.walk(directory, followlinks=False):
         if include_pattern is not None and not include_pattern in root:
             continue
 
@@ -25,7 +25,13 @@ def grep_dir(value: str, directory: str, include_pattern: str | None = None) -> 
             if not f.endswith((".yaml", ".yml")):
                 continue
 
-            with open(os.path.join(root, f), mode="r", encoding="utf-8") as fd:
+            full_path = os.path.join(root, f)
+
+            # Skip symlinks since we'll also find the linked-to file
+            if os.path.islink(full_path):
+                continue
+
+            with open(full_path, mode="r", encoding="utf-8") as fd:
                 for line in fd.readlines():
                     if value in line:
                         return True
